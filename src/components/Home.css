@@ -1,0 +1,30 @@
+/* Ensure Home section takes up full space */
+.home {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1; /* Allows it to expand properly */
+    padding: 20px;
+    text-align: center;
+  }
+  
+  /* Prevents content from stretching too wide */
+  .lander {
+    max-width: 600px;
+    width: 100%;
+  }
+  
+  .cta-button {
+    background-color: #28a745;
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+  }
+  
+  .cta-button:hover {
+    background-color: #218838;
+  }
+  
