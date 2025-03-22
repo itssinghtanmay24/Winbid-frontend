@@ -15,6 +15,9 @@ const Header = () => {
           <li><Link to="/contact">Contact</Link></li>
         </ul>
       </nav>
+      <div className="auth-buttons">
+        <Link to="/login" className="login-button">Login</Link>
+      </div>
     </header>
   );
 };
