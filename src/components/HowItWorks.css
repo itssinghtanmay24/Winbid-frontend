@@ -1,36 +1,43 @@
 .how-it-works {
-    max-width: 800px;
-    margin: auto;
-    padding: 40px 20px;
-    text-align: center;
-  }
-  
-  .how-it-works h1 {
-    font-size: 2em;
-    margin-bottom: 20px;
-    color: #333;
-  }
-  
-  .steps {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  .step {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .step h2 {
-    font-size: 1.5em;
-    color: #007bff;
-  }
-  
-  .step p {
-    font-size: 1.1em;
-    color: #555;
-  }
-  
+  max-width: 800px;
+  margin: auto;
+  padding: 40px 20px;
+  text-align: center;
+  background: linear-gradient(135deg, #ffecd2, #fcb69f);
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.how-it-works h1 {
+  font-size: 2em;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.step {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out;
+}
+
+.step:hover {
+  transform: translateY(-5px);
+}
+
+.step h2 {
+  font-size: 1.5em;
+  color: #007bff;
+}
+
+.step p {
+  font-size: 1.1em;
+  color: #555;
+}

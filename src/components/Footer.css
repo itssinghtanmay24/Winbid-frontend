@@ -3,8 +3,9 @@
   color: white;
   text-align: center;
   padding: 20px 0;
-  width: 100%;
-  position: fixed;
+  width: 100vw; /* Ensure full viewport width */
+  position: relative;
   bottom: 0;
   left: 0;
+  right: 0;
 }
