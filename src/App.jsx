@@ -6,10 +6,11 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
-import AddProduct from "./components/AddProduct";
 import Payment from "./components/Payment";
 import Contact from "./components/Contact";
 import ApiTest from "./components/ApiTest";
+import AddProductForm from "./components/AddProductForm";
+
 function App() {
   return (
     <Router>
@@ -22,10 +23,11 @@ function App() {
             <Route path="/how-it-works" element={<HowItWorks />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/add-product" element={<AddProduct />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/ApiTest" element={<ApiTest />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/add-product" element={<AddProductForm />} />
           </Routes>
         </main>
         <Footer />

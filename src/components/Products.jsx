@@ -1,17 +1,69 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaPlus } from "react-icons/fa";
 import { Container, Grid, Card, CardMedia, CardContent, Typography, Button, LinearProgress, Fab, Box, Tooltip } from "@mui/material";
-
-const products = [
-  { id: 1, name: "Smartphone", description: "Latest model with advanced features.", imageUrl: "https://via.placeholder.com/150", bidPrice: 99, totalBids: 100, completedBids: 75 },
-  { id: 2, name: "Laptop", description: "Powerful laptop for work and gaming.", imageUrl: "https://via.placeholder.com/150", bidPrice: 49, totalBids: 80, completedBids: 40 },
-  { id: 3, name: "Headphones", description: "Noise-canceling headphones for immersive sound.", imageUrl: "https://via.placeholder.com/150", bidPrice: 59, totalBids: 120, completedBids: 90 },
-  { id: 4, name: "Smartwatch", description: "Track fitness and stay connected on the go.", imageUrl: "https://via.placeholder.com/150", bidPrice: 79, totalBids: 50, completedBids: 20 },
-];
+import productApi from "../services/productApi";
 
 const Products = () => {
   const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await productApi.getAllProducts();
+        
+        // Fetch completed bids and winner for each product
+        const productsWithBidsAndWinner = await Promise.all(
+          data.map(async (product) => {
+            try {
+              const completedBids = await productApi.getCompletedBids(product.id);
+              const winnerId = await productApi.getProductWinner(product.id);
+              
+              return {
+                ...product,
+                completedBids: completedBids,
+                winnerId: winnerId
+              };
+            } catch (err) {
+              console.error(`Error fetching data for product ${product.id}:`, err);
+              return {
+                ...product,
+                completedBids: 0, // Default value if there's an error
+                winnerId: 0       // Default value if there's an error
+              };
+            }
+          })
+        );
+        
+        setProducts(productsWithBidsAndWinner);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <Container maxWidth="md" sx={{ py: 5, textAlign: 'center' }}>
+        <Typography variant="h6">Loading products...</Typography>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="md" sx={{ py: 5, textAlign: 'center' }}>
+        <Typography variant="h6" color="error">Error: {error}</Typography>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
@@ -22,21 +74,62 @@ const Products = () => {
         {products.map((product) => (
           <Grid item key={product.id} xs={12} sm={6} md={4}>
             <Card>
-              <CardMedia component="img" height="150" image={product.imageUrl} alt={product.name} />
+              <Box position="relative">
+                <CardMedia 
+                  component="img" 
+                  height="150" 
+                  image={product.imageUrl || "https://via.placeholder.com/150"} 
+                  alt={product.name}
+                  sx={{
+                    filter: product.winnerId !== 0 ? 'grayscale(100%)' : 'none',
+                    opacity: product.winnerId !== 0 ? 0.7 : 1
+                  }}
+                />
+                {product.winnerId !== 0 && (
+                  <Box
+                    position="absolute"
+                    top="50%"
+                    left="50%"
+                    sx={{
+                      transform: 'translate(-50%, -50%)',
+                      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                      color: 'white',
+                      padding: '5px 10px',
+                      borderRadius: '4px'
+                    }}
+                  >
+                    <Typography variant="subtitle2">
+                      Winner: User {product.winnerId}
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
               <CardContent>
                 <Typography variant="h6">{product.name}</Typography>
                 <Typography variant="body2" color="textSecondary" gutterBottom>
                   {product.description}
                 </Typography>
-                <Typography variant="body1" sx={{ fontWeight: "bold" }}>Bid Price: ₹{product.bidPrice}</Typography>
+                <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                  Bid Price: ₹{product.bidPrice}
+                </Typography>
                 <Box sx={{ mt: 2 }}>
-                  <LinearProgress variant="determinate" value={(product.completedBids / product.totalBids) * 100} />
+                  <LinearProgress 
+                    variant="determinate" 
+                    value={(product.completedBids / product.totalBids) * 100} 
+                  />
                   <Typography variant="body2" align="center" sx={{ mt: 1 }}>
                     {product.completedBids} / {product.totalBids} Bids Completed
                   </Typography>
                 </Box>
-                <Button fullWidth variant="contained" color="primary" sx={{ mt: 2 }} onClick={() => navigate(`/payment`)}>
-                  Place Bid
+                <Button 
+                  fullWidth 
+                  variant="contained" 
+                  color="primary" 
+                  sx={{ mt: 2 }} 
+                  onClick={() => navigate(`/payment`)}
+                  disabled={product.winnerId !== 0}
+                >
+                  {product.winnerId !== 0 ? 'Bidding Closed' : 'Place Bid'}
                 </Button>
               </CardContent>
             </Card>
@@ -44,9 +137,20 @@ const Products = () => {
         ))}
       </Grid>
 
-      {/* Floating Add Product Button with Tooltip */}
       <Tooltip title="Add New Product" arrow>
-        <Fab color="secondary" aria-label="add" sx={{ position: "fixed", bottom: 16, right: 16, zIndex: 1000, backgroundColor: "#f50057", '&:hover': { backgroundColor: "#c51162" } }} onClick={() => navigate("/add-product")}>
+        <Fab 
+          color="secondary" 
+          aria-label="add" 
+          sx={{ 
+            position: "fixed", 
+            bottom: 16, 
+            right: 16, 
+            zIndex: 1000, 
+            backgroundColor: "#f50057", 
+            '&:hover': { backgroundColor: "#c51162" } 
+          }} 
+          onClick={() => navigate("/add-product")}
+        >
           <FaPlus size={20} />
         </Fab>
       </Tooltip>
