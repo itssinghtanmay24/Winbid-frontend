@@ -9,7 +9,7 @@ import RegisterPage from "./components/RegisterPage";
 import AddProduct from "./components/AddProduct";
 import Payment from "./components/Payment";
 import Contact from "./components/Contact";
-
+import ApiTest from "./components/ApiTest";
 function App() {
   return (
     <Router>
@@ -25,6 +25,7 @@ function App() {
             <Route path="/add-product" element={<AddProduct />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/ApiTest" element={<ApiTest />} />
           </Routes>
         </main>
         <Footer />
