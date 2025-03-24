@@ -1,24 +1,51 @@
 import React from "react";
-import { Link } from "react-router-dom"; // Import for navigation
-import "./Footer.css";
+import { Link } from "react-router-dom";
+import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
+import { styled } from "@mui/material/styles";
+
+const FooterContainer = styled(AppBar)({
+  top: "auto",
+  bottom: 0,
+  backgroundColor: "#222",
+  padding: "10px 0",
+  textAlign: "center",
+});
+
+const FooterLinks = styled(Box)({
+  display: "flex",
+  justifyContent: "center",
+  gap: "20px",
+  marginTop: "10px",
+});
 
 const Footer = () => {
   return (
-    <footer className="footer">
-      <div className="footer-content">
-        <h2>Start Your Winning Journey!</h2>
-        <Link to="/products">
-          <button className="footer-button">Start Bidding</button>
-        </Link>
-      </div>
-      <div className="footer-links">
-        <Link to="/about">About</Link>
-        <Link to="/contact">Contact</Link>
-        <Link to="/faq">FAQ</Link>
-        <Link to="/terms">Terms & Conditions</Link>
-      </div>
-      <p className="footer-copyright">© 2025 WinBid | All Rights Reserved</p>
-    </footer>
+    <FooterContainer position="static">
+      <Toolbar sx={{ flexDirection: "column", alignItems: "center" }}>
+        <Typography variant="h6">Start Your Winning Journey!</Typography>
+        
+        <Button
+          variant="contained"
+          color="primary"
+          component={Link}
+          to="/products"
+          sx={{ mt: 1 }}
+        >
+          Start Bidding
+        </Button>
+        
+        <FooterLinks>
+          <Button color="inherit" component={Link} to="/about">About</Button>
+          <Button color="inherit" component={Link} to="/contact">Contact</Button>
+          <Button color="inherit" component={Link} to="/faq">FAQ</Button>
+          <Button color="inherit" component={Link} to="/terms">Terms & Conditions</Button>
+        </FooterLinks>
+        
+        <Typography variant="body2" sx={{ mt: 1, color: "#bbb" }}>
+          © 2025 WinBid | All Rights Reserved
+        </Typography>
+      </Toolbar>
+    </FooterContainer>
   );
 };
 

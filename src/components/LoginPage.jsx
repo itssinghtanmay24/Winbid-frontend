@@ -1,7 +1,7 @@
 import React from "react";
-import { FcGoogle } from "react-icons/fc"; // Google Icon
+import { Container, Typography, Button, TextField, Divider, Box } from "@mui/material";
+import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
-import "./LoginPage.css"; // Import CSS for additional styling if needed
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -12,38 +12,41 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-box">
-        <h2 className="login-title">Login to WinBid</h2>
-        <p className="login-subtitle">Enter your details to access your account</p>
+    <Container maxWidth="xs" sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100vh" }}>
+      <Box sx={{ width: "100%", textAlign: "center", p: 3, boxShadow: 3, borderRadius: 2 }}>
+        <Typography variant="h4" gutterBottom>Login to WinBid</Typography>
+        <Typography variant="body1" color="textSecondary" gutterBottom>Enter your details to access your account</Typography>
 
-        {/* Google Login Button */}
-        <button onClick={handleGoogleLogin} className="google-login-button">
-          <FcGoogle className="google-icon" />
-          <span>Login with Google</span>
-        </button>
+        <Button 
+          variant="contained" 
+          startIcon={<FcGoogle />} 
+          fullWidth 
+          sx={{ mt: 2, mb: 2, bgcolor: "white", color: "black", border: "1px solid #ccc" }}
+          onClick={handleGoogleLogin}
+        >
+          Login with Google
+        </Button>
 
-        {/* Divider */}
-        <div className="divider">
-          <hr className="line" />
-          <span>or</span>
-          <hr className="line" />
-        </div>
+        <Divider sx={{ my: 2 }}>or</Divider>
 
-        {/* Email & Password Login */}
-        <input type="email" placeholder="Email" className="input-field" />
-        <input type="password" placeholder="Password" className="input-field" />
+        <TextField fullWidth label="Email" margin="normal" variant="outlined" />
+        <TextField fullWidth label="Password" margin="normal" variant="outlined" type="password" />
+        
+        <Button variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>Login</Button>
 
-        <button className="login-button">Login</button>
-
-        <p className="signup-text">
-          Don't have an account?{" "}
-          <span className="signup-link" onClick={() => navigate("/register")}>
+        <Typography variant="body2" sx={{ mt: 2 }}>
+          Don't have an account?{' '}
+          <Typography
+            component="span"
+            color="primary"
+            sx={{ cursor: "pointer" }}
+            onClick={() => navigate("/register")}
+          >
             Sign Up
-          </span>
-        </p>
-      </div>
-    </div>
+          </Typography>
+        </Typography>
+      </Box>
+    </Container>
   );
 };
 

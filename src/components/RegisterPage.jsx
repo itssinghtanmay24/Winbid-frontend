@@ -1,6 +1,6 @@
 import React, { useState } from "react";
+import { Container, TextField, Button, Typography, MenuItem, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import "./RegisterPage.css"; // Import CSS for additional styling if needed
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -24,65 +24,33 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="register-container">
-      <div className="register-box">
-        <h2 className="register-title">Create an Account</h2>
-        <p className="register-subtitle">Join WinBid and start bidding!</p>
-
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            name="firstName"
-            placeholder="First Name"
-            className="input-field"
-            value={formData.firstName}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="text"
-            name="lastName"
-            placeholder="Last Name"
-            className="input-field"
-            value={formData.lastName}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            className="input-field"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            className="input-field"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-
-          <select name="role" className="input-field" value={formData.role} onChange={handleChange}>
-            <option value="USER">User</option>
-            <option value="ADMIN">Admin</option>
-          </select>
-
-          <button type="submit" className="register-button">Register</button>
-        </form>
-
-        <p className="login-text">
-          Already have an account?{" "}
-          <span className="login-link" onClick={() => navigate("/login")}>
-            Login
-          </span>
-        </p>
-      </div>
-    </div>
+    <Container maxWidth="sm" sx={{ mt: 5, textAlign: "center" }}>
+      <Typography variant="h4" gutterBottom>
+        Create an Account
+      </Typography>
+      <Typography variant="body1" gutterBottom>
+        Join WinBid and start bidding!
+      </Typography>
+      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 2 }}>
+        <TextField label="First Name" name="firstName" value={formData.firstName} onChange={handleChange} required fullWidth />
+        <TextField label="Last Name" name="lastName" value={formData.lastName} onChange={handleChange} required fullWidth />
+        <TextField label="Email" type="email" name="email" value={formData.email} onChange={handleChange} required fullWidth />
+        <TextField label="Password" type="password" name="password" value={formData.password} onChange={handleChange} required fullWidth />
+        <TextField select label="Role" name="role" value={formData.role} onChange={handleChange} fullWidth>
+          <MenuItem value="USER">User</MenuItem>
+          <MenuItem value="ADMIN">Admin</MenuItem>
+        </TextField>
+        <Button type="submit" variant="contained" color="primary" fullWidth>
+          Register
+        </Button>
+      </Box>
+      <Typography variant="body2" sx={{ mt: 2 }}>
+        Already have an account?{' '}
+        <Button onClick={() => navigate("/login")} sx={{ textTransform: "none" }}>
+          Login
+        </Button>
+      </Typography>
+    </Container>
   );
 };
 
