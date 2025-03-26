@@ -92,7 +92,7 @@ const Products = () => {
                     left="50%"
                     sx={{
                       transform: 'translate(-50%, -50%)',
-                      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                      backgroundColor: 'rgba(218, 54, 25, 0.7)',
                       color: 'white',
                       padding: '5px 10px',
                       borderRadius: '4px'

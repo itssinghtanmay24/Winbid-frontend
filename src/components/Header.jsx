@@ -142,9 +142,9 @@ const Header = () => {
               <MenuItem onClick={() => { handleMenuClose(); navigate('/profile'); }}>
                 My Profile
               </MenuItem>
-              <MenuItem onClick={() => { handleMenuClose(); navigate('/my-bids'); }}>
+              {/* <MenuItem onClick={() => { handleMenuClose(); navigate('/my-bids'); }}>
                 My Bids
-              </MenuItem>
+              </MenuItem> */}
               <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
           </>
@@ -159,7 +159,7 @@ const Header = () => {
               Login
             </Button>
             <Button 
-              variant="outlined" 
+              // variant="outlined" 
               color="inherit" 
               component={Link} 
               to="/register"

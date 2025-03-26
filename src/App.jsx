@@ -10,6 +10,7 @@ import Payment from "./components/Payment";
 import Contact from "./components/Contact";
 import ApiTest from "./components/ApiTest";
 import AddProductForm from "./components/AddProductForm";
+import Profile from "./components/Profile";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/ApiTest" element={<ApiTest />} />
             <Route path="/products" element={<Products />} />
             <Route path="/add-product" element={<AddProductForm />} />
+            <Route path="/profile" element={<Profile />} />  
           </Routes>
         </main>
         <Footer />
