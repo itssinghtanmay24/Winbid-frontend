@@ -1,12 +1,21 @@
-import api from './api';
+import api from "./api";
 
 const productApi = {
   getAllProducts: async () => {
     try {
-      const response = await api.get('/products');
+      const response = await api.get("/products");
       return response.data;
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error("Error fetching products:", error);
+      throw error;
+    }
+  },
+  getAllRoles: async () => {
+    try {
+      const response = await api.get("users/role/17");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching products:", error);
       throw error;
     }
   },
@@ -24,7 +33,7 @@ const productApi = {
   getCompletedBids: async (id) => {
     try {
       const response = await api.get(`/products/bid/${id}`);
-      return response.data; // This should return just the count (integer)
+      return response.data.count || 0; // Ensure we return only the integer count
     } catch (error) {
       console.error(`Error fetching completed bids for product ${id}:`, error);
       throw error;
@@ -33,14 +42,19 @@ const productApi = {
 
   createProduct: async (productData) => {
     try {
-      const response = await api.post('/products', productData);
+      const response = await api.post("/products", productData);
       return response.data;
     } catch (error) {
-      // Convert HTTP error to simple message
+      let errorMessage = "Failed to create product";
       if (error.response) {
-        throw new Error(error.response.data.message || 'Failed to create product');
+        errorMessage = error.response.data.message || errorMessage;
+      } else if (error.request) {
+        errorMessage = "No response from server";
+      } else {
+        errorMessage = error.message;
       }
-      throw error;
+      console.error(errorMessage);
+      throw new Error(errorMessage);
     }
   },
 
@@ -63,15 +77,15 @@ const productApi = {
     }
   },
   // Add this to your productApi.js
-getProductWinner: async (id) => {
-  try {
-    const response = await api.get(`/products/winner/${id}`);
-    return response.data; // This should return the winner's userId (or 0 if no winner)
-  } catch (error) {
-    console.error(`Error fetching winner for product ${id}:`, error);
-    throw error;
-  }
-}
+  getProductWinner: async (id) => {
+    try {
+      const response = await api.get(`/products/winner/${id}`);
+      return response.data; // This should return the winner's userId (or 0 if no winner)
+    } catch (error) {
+      console.error(`Error fetching winner for product ${id}:`, error);
+      throw error;
+    }
+  },
 };
 
 export default productApi;

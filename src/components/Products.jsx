@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaPlus } from "react-icons/fa";
 import { Container, Grid, Card, CardMedia, CardContent, Typography, Button, LinearProgress, Fab, Box, Tooltip } from "@mui/material";
 import productApi from "../services/productApi";
+import AddProductForm from "./AddProductForm";
 
 const Products = () => {
   const navigate = useNavigate();
@@ -49,6 +50,8 @@ const Products = () => {
     fetchProducts();
   }, []);
 
+
+
   if (loading) {
     return (
       <Container maxWidth="md" sx={{ py: 5, textAlign: 'center' }}>
@@ -71,70 +74,82 @@ const Products = () => {
         Available Products
       </Typography>
       <Grid container spacing={3}>
-        {products.map((product) => (
-          <Grid item key={product.id} xs={12} sm={6} md={4}>
-            <Card>
-              <Box position="relative">
-                <CardMedia 
-                  component="img" 
-                  height="150" 
-                  image={product.imageUrl || "https://via.placeholder.com/150"} 
-                  alt={product.name}
+      {products.map((product) => (
+        <Grid item key={product.id} xs={12} sm={6} md={4}>
+          <Card 
+            sx={{ 
+              cursor: 'pointer',
+              transition: 'transform 0.2s',
+              '&:hover': {
+                transform: 'scale(1.02)'
+              }
+            }}
+            onClick={() => navigate(`/products/${product.id}`, { state: { product } })}
+          >
+            <Box position="relative">
+              <CardMedia 
+                component="img" 
+                height="150" 
+                image={product.imageUrl || "https://via.placeholder.com/150"} 
+                alt={product.name}
+                sx={{
+                  filter: product.winnerId !== 0 ? 'grayscale(100%)' : 'none',
+                  opacity: product.winnerId !== 0 ? 0.7 : 1
+                }}
+              />
+              {product.winnerId !== 0 && (
+                <Box
+                  position="absolute"
+                  top="50%"
+                  left="50%"
                   sx={{
-                    filter: product.winnerId !== 0 ? 'grayscale(100%)' : 'none',
-                    opacity: product.winnerId !== 0 ? 0.7 : 1
+                    transform: 'translate(-50%, -50%)',
+                    backgroundColor: 'rgba(218, 54, 25, 0.7)',
+                    color: 'white',
+                    padding: '5px 10px',
+                    borderRadius: '4px'
                   }}
-                />
-                {product.winnerId !== 0 && (
-                  <Box
-                    position="absolute"
-                    top="50%"
-                    left="50%"
-                    sx={{
-                      transform: 'translate(-50%, -50%)',
-                      backgroundColor: 'rgba(218, 54, 25, 0.7)',
-                      color: 'white',
-                      padding: '5px 10px',
-                      borderRadius: '4px'
-                    }}
-                  >
-                    <Typography variant="subtitle2">
-                      Winner: User {product.winnerId}
-                    </Typography>
-                  </Box>
-                )}
-              </Box>
-              <CardContent>
-                <Typography variant="h6">{product.name}</Typography>
-                <Typography variant="body2" color="textSecondary" gutterBottom>
-                  {product.description}
-                </Typography>
-                <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                  Bid Price: ₹{product.bidPrice}
-                </Typography>
-                <Box sx={{ mt: 2 }}>
-                  <LinearProgress 
-                    variant="determinate" 
-                    value={(product.completedBids / product.totalBids) * 100} 
-                  />
-                  <Typography variant="body2" align="center" sx={{ mt: 1 }}>
-                    {product.completedBids} / {product.totalBids} Bids Completed
+                >
+                  <Typography variant="subtitle2">
+                    Winner: User {product.winnerId}
                   </Typography>
                 </Box>
-                <Button 
-                  fullWidth 
-                  variant="contained" 
-                  color="primary" 
-                  sx={{ mt: 2 }} 
-                  onClick={() => navigate(`/payment`)}
-                  disabled={product.winnerId !== 0}
-                >
-                  {product.winnerId !== 0 ? 'Bidding Closed' : 'Place Bid'}
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+              )}
+            </Box>
+            <CardContent>
+              <Typography variant="h6">{product.name}</Typography>
+              <Typography variant="body2" color="textSecondary" gutterBottom>
+                {product.description}
+              </Typography>
+              <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                Bid Price: ₹{product.bidPrice}
+              </Typography>
+              <Box sx={{ mt: 2 }}>
+                <LinearProgress 
+                  variant="determinate" 
+                  value={(product.completedBids / product.totalBids) * 100} 
+                />
+                <Typography variant="body2" align="center" sx={{ mt: 1 }}>
+                  {product.completedBids} / {product.totalBids} Bids Completed
+                </Typography>
+              </Box>
+              <Button 
+                fullWidth 
+                variant="contained" 
+                color="primary" 
+                sx={{ mt: 2 }} 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/payment`, { state: { product } });
+                }}
+                disabled={product.winnerId !== 0}
+              >
+                {product.winnerId !== 0 ? 'Bidding Closed' : 'Place Bid'}
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
+      ))}
       </Grid>
 
       <Tooltip title="Add New Product" arrow>
@@ -149,7 +164,10 @@ const Products = () => {
             backgroundColor: "#f50057", 
             '&:hover': { backgroundColor: "#c51162" } 
           }} 
-          onClick={() => navigate("/add-product")}
+          onClick={() =>{
+            <AddProductForm adminRole={role}/>
+            navigate("/addProduct")}
+          } 
         >
           <FaPlus size={20} />
         </Fab>

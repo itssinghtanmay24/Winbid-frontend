@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Container, TextField, Button, Typography, MenuItem, Box, Alert } from "@mui/material";
+import { Container, TextField, Button, Typography, MenuItem, Box, Alert, Grid } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -52,7 +52,9 @@ const RegisterPage = () => {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 5, textAlign: "center" }}>
+    <Container maxWidth="sm" sx={{ mt: 20, textAlign: "center", }}>
+      <Grid>
+
       <Typography variant="h4" gutterBottom>
         Create an Account
       </Typography>
@@ -134,6 +136,7 @@ const RegisterPage = () => {
           Login
         </Button>
       </Typography>
+      </Grid>
     </Container>
   );
 };

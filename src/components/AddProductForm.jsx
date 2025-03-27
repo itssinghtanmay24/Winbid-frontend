@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   TextField, 
@@ -11,19 +11,59 @@ import {
   CircularProgress
 } from '@mui/material';
 import productApi from '../services/productApi';
+import { useAuth } from '../services/AuthContext'; // Assuming you have an auth context
 
-const AddProductForm = () => {
+const AddProductForm = (adminRole) => {
   const navigate = useNavigate();
+  const { user } = useAuth(); // Get the current user from auth context
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     imageUrl: '',
     bidPrice: '',
-    totalBids: '', // Initialize as empty string
-    admin: { id: 1 }
+    totalBids: '1',
+    admin: {
+    id: 17
+  }
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const [role,setRole]=useState("ADMIN");
+  
+    useEffect(() => {
+      const fetchProducts = async () => {
+        try {
+          const data = await productApi.getAllRoles();
+          
+          // Fetch completed bids and winner for each product
+            console.log("dfghjk",data);
+            
+          setRole(data);
+          console.log("fghjkl.",role);
+          
+          
+          // setProducts(productsWithBidsAndWinner);
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+    
+      fetchProducts();
+    }, [])
+
+  useEffect(() => {
+    console.log("I am into Add product")
+    console.log(user?.role);
+    console.log("dfgnhj",adminRole)
+    // Verify user is admin before allowing access
+    if (role !== 'ADMIN') {
+      navigate('/products', { state: { error: 'Only admins can add products' } });
+    }
+    // console.log("I am into Add product")
+  }, [user, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -46,12 +86,11 @@ const AddProductForm = () => {
       const bidPrice = parseFloat(formData.bidPrice);
       const totalBids = parseInt(formData.totalBids);
       
-      if (isNaN(bidPrice) || bidPrice <= 0) {
-        errors.push('Bid price must be a positive number');
-      }
-      if (isNaN(totalBids) || totalBids <= 0) {
-        errors.push('Total bids must be a positive integer');
-      }
+      if (isNaN(bidPrice) )errors.push('Bid price must be a number');
+      else if (bidPrice <= 0) errors.push('Bid price must be positive');
+      
+      if (isNaN(totalBids)) errors.push('Total bids must be a number');
+      else if (totalBids <= 0) errors.push('Total bids must be positive');
       
       if (errors.length > 0) {
         throw new Error(errors.join('\n'));
@@ -63,12 +102,21 @@ const AddProductForm = () => {
         imageUrl: formData.imageUrl.trim(),
         bidPrice: bidPrice,
         totalBids: totalBids,
-        admin: { id: formData.admin.id }
+        admin: { id: user.id } // Send the admin ID from the authenticated user
       };
   
-      await productApi.createProduct(payload);
-      // Optional: show success message before redirect
-      navigate('/products', { state: { success: 'Product created successfully!' } });
+      const response = await productApi.createProduct(payload);
+      
+      if (response.error) {
+        throw new Error(response.error);
+      }
+      
+      navigate('/products', { 
+        state: { 
+          success: 'Product created successfully!',
+          newProduct: response.data
+        } 
+      });
     } catch (error) {
       console.error('Error creating product:', error);
       setError(error.message || 'Failed to create product. Please try again.');
@@ -76,6 +124,16 @@ const AddProductForm = () => {
       setLoading(false);
     }
   };
+
+  // if (!user || user.role !== 'ADMIN') {
+  //   return (
+  //     <Container maxWidth="sm" sx={{ py: 5 }}>
+  //       <Typography variant="h6" color="error" textAlign="center">
+  //         You don't have permission to access this page
+  //       </Typography>
+  //     </Container>
+  //   );
+  // }
 
   return (
     <Container maxWidth="sm" sx={{ py: 5 }}>
@@ -86,7 +144,9 @@ const AddProductForm = () => {
         
         {error && (
           <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
+            {error.split('\n').map((line, i) => (
+              <div key={i}>{line}</div>
+            ))}
           </Alert>
         )}
 
@@ -121,7 +181,7 @@ const AddProductForm = () => {
           />
           <TextField
             fullWidth
-            label="Bid Price (₹) *"
+            label="Starting Bid Price (₹) *"
             name="bidPrice"
             type="number"
             value={formData.bidPrice}
@@ -132,7 +192,7 @@ const AddProductForm = () => {
           />
           <TextField
             fullWidth
-            label="Total Bids *"
+            label="Total Bids Allowed *"
             name="totalBids"
             type="number"
             value={formData.totalBids}
@@ -140,7 +200,6 @@ const AddProductForm = () => {
             margin="normal"
             required
             inputProps={{ min: "1" }}
-            placeholder="Enter total number of bids available"
           />
           
           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
@@ -151,6 +210,8 @@ const AddProductForm = () => {
               sx={{ mr: 2 }}
               disabled={loading}
               startIcon={loading ? <CircularProgress size={20} /> : null}
+              // onClick={productApi.createProduct(formData)}
+              onClick={onSubmit}
             >
               {loading ? 'Adding...' : 'Add Product'}
             </Button>
