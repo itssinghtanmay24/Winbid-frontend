@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Container, Typography, Button, TextField, Divider, Box, Alert } from "@mui/material";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -21,59 +20,16 @@ const LoginPage = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
-    try {
-      const response = await axios.post("http://localhost:8080/auth/login", formData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      console.log("Login response:", response); // Debug log
-      
-      // Check if the response contains the token in the expected format
-      if (response.data && (response.data.jwt || response.data.token)) {
-        const token = response.data.jwt || response.data.token;
-        localStorage.setItem("authToken", token);
-        
-        // Store user data if available
-        if (response.data.user) {
-          localStorage.setItem("user", JSON.stringify(response.data.user));
-        }
-        
-        // Redirect to frontend products page (not backend URL)
-        navigate("/products");
-      } else {
-        throw new Error("Invalid response format - no token received");
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      
-      let errorMessage = "Login failed";
-      if (err.response) {
-        // Server responded with error status
-        errorMessage = err.response.data?.message || 
-                      err.response.data?.error || 
-                      err.response.statusText;
-        
-        // Handle specific JWT errors
-        if (err.response.data?.includes("JWT")) {
-          errorMessage = "Authentication error. Please try again.";
-        }
-      } else if (err.request) {
-        // No response received
-        errorMessage = "No response from server. Please try again later.";
-      }
-      
-      setError(errorMessage);
-    } finally {
+    
+    // Mock login - just navigate without actual authentication
+    setTimeout(() => {
       setLoading(false);
-    }
+      navigate("/products");
+    }, 1000);
   };
 
   const handleGoogleLogin = () => {
-    alert("Google Login Clicked! (Integrate OAuth here)");
-    // TODO: Add Google OAuth integration
+    alert("Google Login will be implemented later");
   };
 
   return (
