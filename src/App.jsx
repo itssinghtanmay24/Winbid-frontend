@@ -11,26 +11,66 @@ import Contact from "./components/Contact";
 import AddProductForm from "./components/AddProductForm";
 import Profile from "./components/Profile";
 import ProductDetails from "./components/ProductDetails";
-import { AuthProvider } from "./context/AuthContext"; // Import AuthProvider
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 
 function App() {
   return (
     <Router>
-      <AuthProvider> {/* Wrap everything with AuthProvider */}
+      <AuthProvider>
         <div className="app-container">
           <Header />
           <main className="main-content">
             <Routes>
+              {/* Public routes */}
               <Route path="/" element={<Home />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/products/:id" element={<ProductDetails />} />
               <Route path="/how-it-works" element={<HowItWorks />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
-              <Route path="/payment" element={<PaymentPage />} />
               <Route path="/contact" element={<Contact />} />
-              <Route path="/addProduct" element={<AddProductForm />} />
-              <Route path="/profile" element={<Profile />} />
+
+              {/* Protected routes */}
+              <Route
+                path="/products"
+                element={
+                  <ProtectedRoute>
+                    <Products />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/products/:id"
+                element={
+                  <ProtectedRoute>
+                    <ProductDetails />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/payment"
+                element={
+                  <ProtectedRoute>
+                    <PaymentPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/addProduct"
+                element={
+                  <AdminRoute>
+                    <AddProductForm />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </main>
           <Footer />
