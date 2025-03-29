@@ -59,7 +59,7 @@ WinBid is a modern web application where users can participate in product auctio
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/winbid-frontend.git
+   git clone https://github.com/SinghTanmay024/winbid-frontend.git
    cd winbid-frontend
 
 You can simply:
