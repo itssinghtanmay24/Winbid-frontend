@@ -49,5 +49,24 @@ WinBid is a modern web application where users can participate in product auctio
 - ESLint
 - PostCSS + Autoprefixer
 
-## Project Structure
+
+## Getting Started
+
+### Prerequisites
+- Node.js (v18+ recommended)
+- npm (v9+ recommended)
+
+### Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/winbid-frontend.git
+   cd winbid-frontend
+
+You can simply:
+1. Copy all this text
+2. Create a new `README.md` file in your project root
+3. Paste this content
+4. Make any necessary adjustments (like replacing `yourusername` with your actual GitHub username)
+
+The file is properly formatted with Markdown and includes all the sections we discussed about your bidding system functionality.
 
