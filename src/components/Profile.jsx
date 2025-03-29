@@ -6,7 +6,8 @@ import {
   TableHead, TableRow, Paper, CircularProgress, Alert,
   Snackbar
 } from '@mui/material';
-import axios from 'axios';
+import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -22,67 +23,42 @@ const Profile = () => {
     severity: 'success'
   });
   const navigate = useNavigate();
+  const { user: authUser, logout } = useAuth();
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    const storedUser = localStorage.getItem('user');
-    
-    // If no token, redirect to login
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-
-    // Set initial user data from localStorage if available
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setEditedUser(parsedUser);
-      } catch (e) {
-        console.error("Error parsing stored user:", e);
-      }
-    }
-
     const fetchUserData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:8080/api/users/profile', {
-          headers: { 
-            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-            'Content-Type': 'application/json'
-          },
-          withCredentials: true
-        });
+        setError(null);
         
-        console.log("Profile API Response:", response); // Debug log
+        // First check authentication
+        const token = localStorage.getItem('token');
+        if (!token) {
+          navigate('/login');
+          return;
+        }
+
+        // Then fetch fresh data from API
+        const response = await api.get('/users/profile');
         
         if (response.data) {
-          setUser(response.data.user);
-          setEditedUser(response.data.user);
-          setBids(response.data.bids || []);
+          // Destructure the backend response format
+          const { user: userData, bids: userBids = [] } = response.data;
+          
+          setUser(userData);
+          setEditedUser(userData);
+          setBids(userBids);
         }
       } catch (err) {
-        console.error("API Error Details:", {
-          message: err.message,
-          response: err.response,
-          request: err.request
-        });
-        
-        if (err.response) {
-          // Server responded with error status
-          setError(err.response.data?.message || `Server error: ${err.response.status}`);
-        } else if (err.request) {
-          // Request was made but no response
-          setError("Network error - backend not responding");
-        } else {
-          // Other errors
-          setError(err.message);
-        }
+        console.error("Profile fetch error:", err);
         
         if (err.response?.status === 401) {
-          localStorage.removeItem('authToken');
+          logout();
           navigate('/login');
+        } else {
+          setError(err.response?.data?.message || 
+                  err.message || 
+                  'Failed to load profile data');
         }
       } finally {
         setLoading(false);
@@ -90,29 +66,18 @@ const Profile = () => {
     };
 
     fetchUserData();
-  }, [navigate]);
+  }, [navigate, logout]);
 
   const handleEdit = () => setIsEditing(true);
 
   const handleSave = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      const response = await axios.put(
-        `http://localhost:8080/api/users/${user.email}`, 
-        editedUser, 
-        {
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          withCredentials: true
-        }
-      );
+      setLoading(true);
+      const response = await api.put(`/users/${user.email}`, editedUser);
       
       setUser(response.data);
       setEditedUser(response.data);
       setIsEditing(false);
-      localStorage.setItem('user', JSON.stringify(response.data));
       
       setSnackbar({
         open: true,
@@ -120,16 +85,14 @@ const Profile = () => {
         severity: 'success'
       });
     } catch (err) {
-      console.error("Error updating user:", err);
-      const errorMessage = err.response?.data?.message || 
-                         'Failed to update profile';
-      setError(errorMessage);
-      
+      console.error("Update error:", err);
       setSnackbar({
         open: true,
-        message: errorMessage,
+        message: err.response?.data?.message || 'Failed to update profile',
         severity: 'error'
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -152,7 +115,7 @@ const Profile = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
-  if (loading) {
+  if (loading && !user) {
     return (
       <Container maxWidth="md" sx={{ 
         display: 'flex', 
@@ -204,151 +167,156 @@ const Profile = () => {
         </Alert>
       )}
 
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-        <Avatar 
-          src={user?.avatar} 
-          alt={user?.firstName} 
-          sx={{ 
-            width: 100, 
-            height: 100, 
-            mr: 3,
-            fontSize: '2.5rem',
-            bgcolor: 'primary.main'
-          }}
-        >
-          {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
-        </Avatar>
-        <Box>
-          <Typography variant="h4">
-            {user?.firstName} {user?.lastName}
-          </Typography>
-          <Typography variant="subtitle1" color="text.secondary">
-            {user?.email}
-          </Typography>
-        </Box>
-      </Box>
+      {user && (
+        <>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+            <Avatar 
+              src={user.avatar} 
+              alt={`${user.firstName} ${user.lastName}`}
+              sx={{ 
+                width: 100, 
+                height: 100, 
+                mr: 3,
+                fontSize: '2.5rem',
+                bgcolor: 'primary.main'
+              }}
+            >
+              {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+            </Avatar>
+            <Box>
+              <Typography variant="h4">
+                {user.firstName} {user.lastName}
+              </Typography>
+              <Typography variant="subtitle1" color="text.secondary">
+                {user.email}
+              </Typography>
+            </Box>
+          </Box>
 
-      <Tabs 
-        value={tabValue} 
-        onChange={handleTabChange} 
-        sx={{ mb: 3 }}
-        variant="fullWidth"
-      >
-        <Tab label="Profile Details" />
-        <Tab label="My Bids" />
-      </Tabs>
+          <Tabs 
+            value={tabValue} 
+            onChange={handleTabChange} 
+            sx={{ mb: 3 }}
+            variant="fullWidth"
+          >
+            <Tab label="Profile Details" />
+            <Tab label="My Bids" />
+          </Tabs>
 
-      {tabValue === 0 ? (
-        <Box component="form" sx={{ mt: 2 }}>
-          <TextField
-            label="First Name"
-            name="firstName"
-            value={editedUser?.firstName || ''}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            disabled={!isEditing}
-          />
-          <TextField
-            label="Last Name"
-            name="lastName"
-            value={editedUser?.lastName || ''}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            disabled={!isEditing}
-          />
-          <TextField
-            label="Email"
-            name="email"
-            value={editedUser?.email || ''}
-            fullWidth
-            margin="normal"
-            disabled
-          />
+          {tabValue === 0 ? (
+            <Box component="form" sx={{ mt: 2 }}>
+              <TextField
+                label="First Name"
+                name="firstName"
+                value={editedUser?.firstName || ''}
+                onChange={handleChange}
+                fullWidth
+                margin="normal"
+                disabled={!isEditing}
+              />
+              <TextField
+                label="Last Name"
+                name="lastName"
+                value={editedUser?.lastName || ''}
+                onChange={handleChange}
+                fullWidth
+                margin="normal"
+                disabled={!isEditing}
+              />
+              <TextField
+                label="Email"
+                name="email"
+                value={editedUser?.email || ''}
+                fullWidth
+                margin="normal"
+                disabled
+              />
 
-          {isEditing ? (
-            <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
-              <Button 
-                variant="contained" 
-                onClick={handleSave}
-                size="large"
-              >
-                Save Changes
-              </Button>
-              <Button 
-                variant="outlined" 
-                onClick={handleCancel}
-                size="large"
-              >
-                Cancel
-              </Button>
+              {isEditing ? (
+                <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+                  <Button 
+                    variant="contained" 
+                    onClick={handleSave}
+                    size="large"
+                    disabled={loading}
+                  >
+                    {loading ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                  <Button 
+                    variant="outlined" 
+                    onClick={handleCancel}
+                    size="large"
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+              ) : (
+                <Button 
+                  variant="contained" 
+                  onClick={handleEdit}
+                  sx={{ mt: 2 }}
+                  size="large"
+                >
+                  Edit Profile
+                </Button>
+              )}
             </Box>
           ) : (
-            <Button 
-              variant="contained" 
-              onClick={handleEdit}
-              sx={{ mt: 2 }}
-              size="large"
-            >
-              Edit Profile
-            </Button>
-          )}
-        </Box>
-      ) : (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Product</TableCell>
-                <TableCell>Bid Amount</TableCell>
-                <TableCell>Bid Time</TableCell>
-                <TableCell>Status</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {bids.length > 0 ? (
-                bids.map((bid) => (
-                  <TableRow key={bid.id}>
-                    <TableCell>
-                      <Button 
-                        onClick={() => navigate(`/products/${bid.product?.id}`)}
-                        sx={{ textTransform: 'none' }}
-                      >
-                        {bid.product?.name || 'Unknown Product'}
-                      </Button>
-                    </TableCell>
-                    <TableCell>${bid.amount?.toFixed(2)}</TableCell>
-                    <TableCell>
-                      {new Date(bid.bidTime).toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      {bid.isWinning ? (
-                        <Typography color="success.main">Winning</Typography>
-                      ) : (
-                        <Typography color="error.main">Outbid</Typography>
-                      )}
-                    </TableCell>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Product</TableCell>
+                    <TableCell>Bid Amount</TableCell>
+                    <TableCell>Bid Time</TableCell>
+                    <TableCell>Status</TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={4} align="center">
-                    <Typography variant="body1" sx={{ py: 2 }}>
-                      You haven't placed any bids yet
-                    </Typography>
-                    <Button 
-                      variant="outlined" 
-                      onClick={() => navigate('/products')}
-                    >
-                      Browse Products
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {bids.length > 0 ? (
+                    bids.map((bid) => (
+                      <TableRow key={bid.id}>
+                        <TableCell>
+                          <Button 
+                            onClick={() => navigate(`/products/${bid.product?.id}`)}
+                            sx={{ textTransform: 'none' }}
+                          >
+                            {bid.product?.name || 'Unknown Product'}
+                          </Button>
+                        </TableCell>
+                        <TableCell>${bid.amount?.toFixed(2)}</TableCell>
+                        <TableCell>
+                          {new Date(bid.bidTime).toLocaleString()}
+                        </TableCell>
+                        <TableCell>
+                          {bid.isWinning ? (
+                            <Typography color="success.main">Winning</Typography>
+                          ) : (
+                            <Typography color="error.main">Outbid</Typography>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={4} align="center">
+                        <Typography variant="body1" sx={{ py: 2 }}>
+                          You haven't placed any bids yet
+                        </Typography>
+                        <Button 
+                          variant="outlined" 
+                          onClick={() => navigate('/products')}
+                        >
+                          Browse Products
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </>
       )}
     </Container>
   );

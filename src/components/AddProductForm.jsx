@@ -19,11 +19,12 @@ const AddProductForm = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    imageUrl: '',
+    imageFile: null,  // Changed from imageUrl to store File object
     totalBids: 0, 
     bidPrice: 0,
     userId: 1 // Default user ID for testing
   });
+  const [previewUrl, setPreviewUrl] = useState(''); // For image preview
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,6 +38,20 @@ const AddProductForm = () => {
     }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData(prev => ({ ...prev, imageFile: file }));
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -44,23 +59,30 @@ const AddProductForm = () => {
     setIsSubmitting(true);
     
     try {
-      // Prepare the product data according to your backend's ProductRequest
-      const productToCreate = {
-        name: formData.name,
-        description: formData.description,
-        imageUrl: formData.imageUrl,
-        totalBids: formData.totalBids || 0, // Ensure default value if empty
-        bidPrice: formData.bidPrice,
-        userId: formData.userId
-      };
+      // Create FormData object for file upload
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('totalBids', formData.totalBids);
+      formDataToSend.append('bidPrice', formData.bidPrice);
+      formDataToSend.append('userId', formData.userId);
+      
+      // Only append file if it exists
+      if (formData.imageFile) {
+        formDataToSend.append('imageFile', formData.imageFile);
+      }
 
-      // Make API call to your backend endpoint
-      const response = await axios.post('http://localhost:8080/api/products', productToCreate);
+      // Make API call with FormData
+      const response = await axios.post('http://localhost:8080/api/products', formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       
       setSuccess(true);
       setTimeout(() => {
         navigate('/products');
-      }, 1500); // Redirect after 1.5 seconds
+      }, 1500);
       
     } catch (err) {
       const errorMessage = err.response?.data?.message || 
@@ -113,16 +135,34 @@ const AddProductForm = () => {
             rows={4}
           />
           
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Image URL"
-            name="imageUrl"
-            value={formData.imageUrl}
-            onChange={handleChange}
-            type="url"
-            placeholder="https://example.com/image.jpg"
-          />
+          {/* File upload input */}
+          <FormControl fullWidth margin="normal">
+            <Button
+              variant="outlined"
+              component="label"
+              fullWidth
+            >
+              Upload Product Image
+              <input
+                type="file"
+                hidden
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+            </Button>
+            {previewUrl && (
+              <Box mt={2} textAlign="center">
+                <img 
+                  src={previewUrl} 
+                  alt="Preview" 
+                  style={{ maxWidth: '100%', maxHeight: '200px' }} 
+                />
+              </Box>
+            )}
+            <Typography variant="caption" display="block" gutterBottom>
+              {formData.imageFile ? formData.imageFile.name : 'No image selected'}
+            </Typography>
+          </FormControl>
 
           <TextField
             fullWidth

@@ -2,9 +2,12 @@ import React, { useState } from "react";
 import { Container, Typography, Button, TextField, Divider, Box, Alert } from "@mui/material";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: ""
@@ -21,11 +24,32 @@ const LoginPage = () => {
     setLoading(true);
     setError(null);
     
-    // Mock login - just navigate without actual authentication
-    setTimeout(() => {
+    try {
+      // Make API call to login endpoint
+      const response = await api.post('/auth/login', {
+        email: formData.email,
+        password: formData.password
+      });
+
+      const token = response.data.jwt;
+      
+      // Store the token
+      localStorage.setItem('token', token);
+      
+      // Get user details
+      const userResponse = await api.get('/auth/me');
+      const userData = userResponse.data;
+      
+      // Call the login function from AuthContext
+      login(userData, token);
+      
+      // Redirect to products page
+      navigate('/products');
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || 'Login failed. Please try again.');
       setLoading(false);
-      navigate("/products");
-    }, 1000);
+    }
   };
 
   const handleGoogleLogin = () => {
@@ -33,9 +57,25 @@ const LoginPage = () => {
   };
 
   return (
-    <Container maxWidth="xs" sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100vh" }}>
-      <Box sx={{ width: "100%", textAlign: "center", p: 3, boxShadow: 3, borderRadius: 2 }}>
-        <Typography variant="h4" gutterBottom>Login to WinBid</Typography>
+    <Container maxWidth="xs" sx={{ 
+      display: "flex", 
+      flexDirection: "column", 
+      alignItems: "center", 
+      justifyContent: "center", 
+      height: "100vh",
+      py: 4
+    }}>
+      <Box sx={{ 
+        width: "100%", 
+        textAlign: "center", 
+        p: 4, 
+        boxShadow: 3, 
+        borderRadius: 2,
+        backgroundColor: 'background.paper'
+      }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
+          Login to WinBid
+        </Typography>
         <Typography variant="body1" color="textSecondary" gutterBottom>
           Enter your details to access your account
         </Typography>
@@ -47,16 +87,27 @@ const LoginPage = () => {
         )}
 
         <Button 
-          variant="contained" 
+          variant="outlined" 
           startIcon={<FcGoogle />} 
           fullWidth 
-          sx={{ mt: 2, mb: 2, bgcolor: "white", color: "black", border: "1px solid #ccc" }}
+          sx={{ 
+            mt: 2, 
+            mb: 2, 
+            py: 1.5,
+            backgroundColor: "background.paper",
+            color: "text.primary",
+            borderColor: 'divider',
+            '&:hover': {
+              backgroundColor: 'action.hover',
+              borderColor: 'text.secondary'
+            }
+          }}
           onClick={handleGoogleLogin}
         >
-          Login with Google
+          Continue with Google
         </Button>
 
-        <Divider sx={{ my: 2 }}>or</Divider>
+        <Divider sx={{ my: 2, color: 'text.secondary' }}>or</Divider>
 
         <form onSubmit={handleSubmit}>
           <TextField 
@@ -69,6 +120,7 @@ const LoginPage = () => {
             onChange={handleChange}
             required
             type="email"
+            sx={{ mb: 2 }}
           />
           <TextField 
             fullWidth 
@@ -80,13 +132,20 @@ const LoginPage = () => {
             value={formData.password}
             onChange={handleChange}
             required
+            sx={{ mb: 2 }}
           />
           
           <Button 
             variant="contained" 
             color="primary" 
             fullWidth 
-            sx={{ mt: 2 }}
+            size="large"
+            sx={{ 
+              mt: 2,
+              py: 1.5,
+              fontWeight: 'bold',
+              fontSize: '1rem'
+            }}
             type="submit"
             disabled={loading}
           >
@@ -94,12 +153,18 @@ const LoginPage = () => {
           </Button>
         </form>
 
-        <Typography variant="body2" sx={{ mt: 2 }}>
+        <Typography variant="body2" sx={{ mt: 3, textAlign: 'center' }}>
           Don't have an account?{' '}
           <Typography
             component="span"
             color="primary"
-            sx={{ cursor: "pointer" }}
+            sx={{ 
+              cursor: "pointer",
+              fontWeight: 'bold',
+              '&:hover': {
+                textDecoration: 'underline'
+              }
+            }}
             onClick={() => navigate("/register")}
           >
             Sign Up

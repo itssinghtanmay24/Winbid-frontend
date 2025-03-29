@@ -1,98 +1,98 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { 
   AppBar, 
   Toolbar, 
   Typography, 
-  InputBase, 
   Button, 
-  Box
+  Box,
+  Avatar,
+  IconButton
 } from "@mui/material";
-import { Search as SearchIcon } from "@mui/icons-material";
-import { styled } from "@mui/material/styles";
-
-const Search = styled("form")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  backgroundColor: "#f1f1f1",
-  borderRadius: theme.shape.borderRadius,
-  padding: "4px 10px",
-  marginLeft: "auto",
-  marginRight: "auto",
-  width: "40%",
-  [theme.breakpoints.down('sm')]: {
-    width: "100%",
-    margin: "10px 0"
-  }
-}));
+import { useAuth } from "../context/AuthContext";
 
 const Header = () => {
-  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-    }
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const handleProfileClick = () => {
+    navigate('/profile');
   };
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: "#222" }}>
-      <Toolbar sx={{ flexWrap: 'wrap' }}>
+    <AppBar position="static" sx={{ backgroundColor: "white", color: "black", boxShadow: "none" }}>
+      <Toolbar sx={{ justifyContent: "space-between" }}>
         <Typography 
-          variant="h6" 
+          variant="h4" 
           component={Link} 
           to="/" 
           sx={{ 
             textDecoration: "none", 
             color: "inherit",
-            mr: 2,
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            letterSpacing: '1px'
           }}
         >
           WinBid
         </Typography>
         
-        <Box sx={{ 
-          flexGrow: 1, 
-          display: "flex", 
-          justifyContent: "center",
-          flexWrap: 'wrap'
-        }}>
-          <Button color="inherit" component={Link} to="/">Home</Button>
-          <Button color="inherit" component={Link} to="/products">Products</Button>
-          <Button color="inherit" component={Link} to="/how-it-works">How It Works</Button>
-        </Box>
-
-        <Search onSubmit={handleSearch}>
-          <SearchIcon />
-          <InputBase
-            placeholder="Find products..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{ ml: 1, flex: 1 }}
-          />
-        </Search>
-
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        {user ? (
+          <Box display="flex" alignItems="center" gap={2}>
+            <IconButton onClick={handleProfileClick} sx={{ p: 0 }}>
+              <Avatar 
+                alt={user.firstName} 
+                src={user.avatar}
+                sx={{ 
+                  width: 40, 
+                  height: 40,
+                  bgcolor: 'primary.main',
+                  cursor: 'pointer',
+                  '&:hover': {
+                    transform: 'scale(1.1)',
+                    transition: 'transform 0.3s ease'
+                  }
+                }}
+              >
+                {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+              </Avatar>
+            </IconButton>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              onClick={handleLogout}
+              sx={{ 
+                textTransform: 'none',
+                fontSize: '1rem',
+                px: 3,
+                py: 1,
+                borderRadius: '8px'
+              }}
+            >
+              Logout
+            </Button>
+          </Box>
+        ) : (
           <Button 
-            color="inherit" 
+            variant="contained" 
+            color="primary" 
             component={Link} 
             to="/login"
-            sx={{ whiteSpace: 'nowrap' }}
+            sx={{ 
+              textTransform: 'none',
+              fontSize: '1rem',
+              px: 3,
+              py: 1,
+              borderRadius: '8px'
+            }}
           >
             Login
           </Button>
-          <Button 
-            color="inherit" 
-            component={Link} 
-            to="/register"
-            sx={{ whiteSpace: 'nowrap' }}
-          >
-            Register
-          </Button>
-        </Box>
+        )}
       </Toolbar>
     </AppBar>
   );
