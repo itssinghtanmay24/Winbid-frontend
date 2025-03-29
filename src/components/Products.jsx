@@ -15,20 +15,20 @@ import {
   Tooltip,
 } from "@mui/material";
 import productApi from "../services/productApi";
-import AddProductForm from "./AddProductForm";
+import { useAuth } from "../context/AuthContext";
 
 const Products = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const data = await productApi.getAllProducts();
 
-        // Fetch completed bids and winner for each product
         const productsWithBidsAndWinner = await Promise.all(
           data.map(async (product) => {
             try {
@@ -49,8 +49,8 @@ const Products = () => {
               );
               return {
                 ...product,
-                completedBids: 0, // Default value if there's an error
-                winnerId: 0, // Default value if there's an error
+                completedBids: 0,
+                winnerId: 0,
               };
             }
           })
@@ -143,11 +143,7 @@ const Products = () => {
                 <Typography variant="body1" sx={{ fontWeight: "bold" }}>
                   Bid Price: ₹{product.bidPrice}
                 </Typography>
-                <Box sx={{ mt: 2 }}>
-                  <LinearProgress
-                    variant="determinate"
-                    value={(product.completedBids / product.totalBids) * 100}
-                  />
+                <Box>
                   <Typography variant="body2" align="center" sx={{ mt: 1 }}>
                     {product.completedBids} / {product.totalBids} Bids Completed
                   </Typography>
@@ -171,23 +167,25 @@ const Products = () => {
         ))}
       </Grid>
 
-      <Tooltip title="Add New Product" arrow>
-        <Fab
-          color="secondary"
-          aria-label="add"
-          sx={{
-            position: "fixed",
-            bottom: 16,
-            right: 16,
-            zIndex: 1000,
-            backgroundColor: "#f50057",
-            "&:hover": { backgroundColor: "#c51162" },
-          }}
-          onClick={() => navigate("/addProduct")} // Simplified navigation
-        >
-          <FaPlus size={20} />
-        </Fab>
-      </Tooltip>
+      {user?.role === "ADMIN" && (
+        <Tooltip title="Add New Product" arrow>
+          <Fab
+            color="secondary"
+            aria-label="add"
+            sx={{
+              position: "fixed",
+              bottom: 16,
+              right: 16,
+              zIndex: 1000,
+              backgroundColor: "#f50057",
+              "&:hover": { backgroundColor: "#c51162" },
+            }}
+            onClick={() => navigate("/addProduct")}
+          >
+            <FaPlus size={20} />
+          </Fab>
+        </Tooltip>
+      )}
     </Container>
   );
 };
