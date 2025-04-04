@@ -39,10 +39,9 @@ const productApi = {
 
   createProduct: async (productData) => {
     try {
-      // Ensure admin object is properly structured
       const formattedData = {
         ...productData,
-        admin: { id: productData.adminId } // Transform adminId to admin object
+        admin: { id: productData.adminId }
       };
       
       const response = await api.post("/products", formattedData);
@@ -77,6 +76,33 @@ const productApi = {
       throw handleApiError(error, `Error fetching winner for product ${id}`);
     }
   },
+
+  getUserByEmail: async (email) => {
+    try {
+      const response = await api.get(`/users/${email}`);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, `Error fetching user with email ${email}`);
+    }
+  },
+
+  getUsernameById: async (userId) => {
+    try {
+      const response = await api.get(`/users/id/${userId}`);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, `Error fetching username for user ${userId}`);
+    }
+  },
+
+  updateUser: async (email, userData) => {
+    try {
+      const response = await api.put(`/users/${email}`, userData);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, `Error updating user ${email}`);
+    }
+  }
 };
 
 // Helper function for consistent error handling

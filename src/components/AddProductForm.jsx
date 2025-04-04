@@ -7,10 +7,7 @@ import {
   Typography, 
   Paper,
   Alert,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem
+  FormControl
 } from '@mui/material';
 import axios from 'axios';
 
@@ -19,12 +16,11 @@ const AddProductForm = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    imageFile: null,  // Changed from imageUrl to store File object
+    imageUrl: '', // Changed from imageFile to imageUrl
     totalBids: 0, 
     bidPrice: 0,
-    userId: 1 // Default user ID for testing
+    userId: '67e8d1911c9eb13e31f27534'
   });
-  const [previewUrl, setPreviewUrl] = useState(''); // For image preview
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,20 +34,6 @@ const AddProductForm = () => {
     }));
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData(prev => ({ ...prev, imageFile: file }));
-      
-      // Create preview URL
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -59,23 +41,19 @@ const AddProductForm = () => {
     setIsSubmitting(true);
     
     try {
-      // Create FormData object for file upload
-      const formDataToSend = new FormData();
-      formDataToSend.append('name', formData.name);
-      formDataToSend.append('description', formData.description);
-      formDataToSend.append('totalBids', formData.totalBids);
-      formDataToSend.append('bidPrice', formData.bidPrice);
-      formDataToSend.append('userId', formData.userId);
-      
-      // Only append file if it exists
-      if (formData.imageFile) {
-        formDataToSend.append('imageFile', formData.imageFile);
-      }
+      // Now sending as JSON with imageUrl instead of FormData
+      const productData = {
+        name: formData.name,
+        description: formData.description,
+        imageUrl: formData.imageUrl,
+        totalBids: formData.totalBids,
+        bidPrice: formData.bidPrice,
+        owner: formData.userId
+      };
 
-      // Make API call with FormData
-      const response = await axios.post('http://localhost:8080/api/products', formDataToSend, {
+      const response = await axios.post('http://localhost:8080/api/products', productData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'application/json'
         }
       });
       
@@ -135,34 +113,28 @@ const AddProductForm = () => {
             rows={4}
           />
           
-          {/* File upload input */}
-          <FormControl fullWidth margin="normal">
-            <Button
-              variant="outlined"
-              component="label"
-              fullWidth
-            >
-              Upload Product Image
-              <input
-                type="file"
-                hidden
-                accept="image/*"
-                onChange={handleFileChange}
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Image URL"
+            name="imageUrl"
+            value={formData.imageUrl}
+            onChange={handleChange}
+            placeholder="https://example.com/image.jpg"
+          />
+
+          {formData.imageUrl && (
+            <Box mt={2} textAlign="center">
+              <img 
+                src={formData.imageUrl} 
+                alt="Preview" 
+                style={{ maxWidth: '100%', maxHeight: '200px' }} 
+                onError={(e) => {
+                  e.target.style.display = 'none'; // Hide if image fails to load
+                }}
               />
-            </Button>
-            {previewUrl && (
-              <Box mt={2} textAlign="center">
-                <img 
-                  src={previewUrl} 
-                  alt="Preview" 
-                  style={{ maxWidth: '100%', maxHeight: '200px' }} 
-                />
-              </Box>
-            )}
-            <Typography variant="caption" display="block" gutterBottom>
-              {formData.imageFile ? formData.imageFile.name : 'No image selected'}
-            </Typography>
-          </FormControl>
+            </Box>
+          )}
 
           <TextField
             fullWidth
@@ -186,13 +158,6 @@ const AddProductForm = () => {
             inputProps={{ min: 0, step: 0.01 }}
             required
             error={!!error && (formData.bidPrice <= 0)}
-          />
-          
-          {/* Hidden user ID field for testing */}
-          <input 
-            type="hidden" 
-            name="userId" 
-            value={formData.userId} 
           />
 
           <Button

@@ -7,7 +7,6 @@ import {
   Snackbar
 } from '@mui/material';
 import api from '../services/api';
-import { useAuth } from '../context/AuthContext';
 
 const Profile = () => {
   const [user, setUser] = useState(null);

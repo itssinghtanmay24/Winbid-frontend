@@ -2,12 +2,10 @@ import React, { useState } from "react";
 import { Container, Typography, Button, TextField, Divider, Box, Alert } from "@mui/material";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: ""
