@@ -19,6 +19,8 @@ const FooterLinks = styled(Box)({
 });
 
 const Footer = () => {
+  const currentYear = new Date().getFullYear();
+
   return (
     <FooterContainer position="static">
       <Toolbar sx={{ flexDirection: "column", alignItems: "center" }}>
@@ -35,14 +37,23 @@ const Footer = () => {
         </Button>
         
         <FooterLinks>
-          <Button color="inherit" component={Link} to="/about">About</Button>
+          <Button color="inherit" component={Link} to="/howitworks">About</Button>
           <Button color="inherit" component={Link} to="/contact">Contact</Button>
-          <Button color="inherit" component={Link} to="/faq">FAQ</Button>
-          <Button color="inherit" component={Link} to="/terms">Terms & Conditions</Button>
+          <Button color="inherit" component={Link} to="/">FAQ</Button>
+          <Button color="inherit" component={Link} to="/">Terms & Conditions</Button>
+          <Button 
+            color="inherit" 
+            component="a" 
+            href="https://tanmaysinghportfolio.netlify.app/" 
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Founder Tanmay Singh
+          </Button>
         </FooterLinks>
         
         <Typography variant="body2" sx={{ mt: 1, color: "#bbb" }}>
-          © 2025 WinBid | All Rights Reserved
+          © {currentYear} WinBid | All Rights Reserved
         </Typography>
       </Toolbar>
     </FooterContainer>

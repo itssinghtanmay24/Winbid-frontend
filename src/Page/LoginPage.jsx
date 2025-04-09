@@ -29,7 +29,7 @@ const LoginPage = () => {
       }
 
       // Make API call to login endpoint
-      const response = await axios.post("http://localhost:8080/api/auth/login", {
+      const response = await axios.post("https://winbid-node-js.onrender.com/api/auth/login", {
         email: formData.email,
         password: formData.password
       });

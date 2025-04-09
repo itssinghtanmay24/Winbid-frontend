@@ -51,7 +51,7 @@ const AddProductForm = () => {
         owner: formData.userId
       };
 
-      const response = await axios.post('http://localhost:8080/api/products', productData, {
+      const response = await axios.post('https://winbid-node-js.onrender.com/api/products', productData, {
         headers: {
           'Content-Type': 'application/json'
         }

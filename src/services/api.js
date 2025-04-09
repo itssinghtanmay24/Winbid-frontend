@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api', // Ensure this matches your backend
+  baseURL: 'https://winbid-node-js.onrender.com/api', // Ensure this matches your backend
   headers: {
     'Content-Type': 'application/json',
   },
