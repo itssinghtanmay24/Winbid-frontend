@@ -18,7 +18,7 @@ import { Email, Person, Phone, Home, Edit, Save, Cancel } from '@mui/icons-mater
 import productApi from '../services/productApi';
 
 const ProfilePage = () => {
-  const { email } = useParams();
+  const { Id } = useParams();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -44,7 +44,7 @@ const ProfilePage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const userResponse = await productApi.getUserByEmail(email);
+        const userResponse = await productApi.getUserByID(Id);
         setUser(userResponse.data);
         setFormData({
           phone: userResponse.data.phone || '',
@@ -65,7 +65,7 @@ const ProfilePage = () => {
     };
 
     fetchData();
-  }, [email]);
+  }, [Id]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

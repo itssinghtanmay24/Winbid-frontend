@@ -77,12 +77,12 @@ const productApi = {
     }
   },
 
-  getUserByEmail: async (email) => {
+  getUserByID: async (Id) => {
     try {
-      const response = await api.get(`/users/${email}`);
+      const response = await api.get(`/users/${Id}`);
       return response.data;
     } catch (error) {
-      throw handleApiError(error, `Error fetching user with email ${email}`);
+      throw handleApiError(error, `Error fetching user with email ${Id}`);
     }
   },
 

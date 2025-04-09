@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Container, Typography, Button, TextField, Divider, Box, Alert } from "@mui/material";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api";
+import axios from "axios";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -17,42 +17,50 @@ const LoginPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmitEvent = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    
+
     try {
+      // Basic validation
+      if (!formData.email || !formData.password) {
+        throw new Error("Please provide both email and password");
+      }
+
       // Make API call to login endpoint
-      const response = await api.post('/auth/login', {
+      const response = await axios.post("http://localhost:8080/api/auth/login", {
         email: formData.email,
         password: formData.password
       });
 
-      const token = response.data.jwt;
+      // Check if login was successful
+      if (response.data.success && response.data.token) {
+        // Store the token in localStorage or context
+        localStorage.setItem("authToken", response.data.token);
+        localStorage.setItem("userId", response.data.user.id);
+        
+        // You might want to store user data in context or redux here
+        
+        // Navigate to products page
+        navigate('/products');
+      } else {
+        throw new Error("Login failed. Please try again.");
+      }
       
-      // Store the token
-      localStorage.setItem('token', token);
-      
-      // Get user details
-      const userResponse = await api.get('/auth/me');
-      const userData = userResponse.data;
-      
-      // Call the login function from AuthContext
-      login(userData, token);
-      
-      // Redirect to products page
-      navigate('/products');
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+      setError(err.response?.data?.message || err.message || 'Login failed. Please try again.');
+    } finally {
       setLoading(false);
     }
   };
 
+  // ... rest of your component remains the same ...
   const handleGoogleLogin = () => {
     alert("Google Login will be implemented later");
   };
+
 
   return (
     <Container maxWidth="xs" sx={{ 
@@ -107,7 +115,7 @@ const LoginPage = () => {
 
         <Divider sx={{ my: 2, color: 'text.secondary' }}>or</Divider>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmitEvent}>
           <TextField 
             fullWidth 
             label="Email" 

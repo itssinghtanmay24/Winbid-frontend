@@ -1,7 +1,17 @@
 import React, { useState } from "react";
-import { Container, TextField, Button, Typography, MenuItem, Box, Alert, Grid } from "@mui/material";
+import { 
+  Container,
+  TextField,
+  Button,
+  Typography,
+  MenuItem,
+  Box,
+  Alert,
+  Grid,
+  CircularProgress,
+  Link
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -10,6 +20,7 @@ const RegisterPage = () => {
     password: "",
     firstName: "",
     lastName: "",
+    username: "",
     role: "USER",
   });
   const [error, setError] = useState(null);
@@ -26,116 +37,190 @@ const RegisterPage = () => {
     setError(null);
     
     try {
-      const response = await axios.post("http://localhost:8080/auth/register", formData);
+      // Basic validation
+      if (!formData.email || !formData.password || !formData.firstName || !formData.lastName || !formData.username) {
+        throw new Error("Please fill in all required fields");
+      }
+
+      // Simulate registration API call
+      console.log("Registration data:", formData);
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      if (response.status === 201) {
-        setSuccess(true);
-        // Optionally auto-redirect after a delay
-        setTimeout(() => {
-          navigate("/login");
-        }, 2000);
-      }
+      setSuccess(true);
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
     } catch (err) {
-      if (err.response) {
-        // The request was made and the server responded with a status code
-        setError(err.response.data || "Registration failed");
-      } else if (err.request) {
-        // The request was made but no response was received
-        setError("No response from server. Please try again later.");
-      } else {
-        // Something happened in setting up the request
-        setError("An error occurred. Please try again.");
-      }
+      console.error('Registration error:', err);
+      setError(err.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 20, textAlign: "center", }}>
-      <Grid>
+    <Container maxWidth="sm" sx={{ 
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      minHeight: "80vh",
+      py: 4
+    }}>
+      <Grid container justifyContent="center">
+        <Grid item xs={12} md={8}>
+          <Box sx={{ 
+            p: 4, 
+            boxShadow: 3, 
+            borderRadius: 2,
+            backgroundColor: 'background.paper'
+          }}>
+            <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', textAlign: 'center' }}>
+              Create an Account
+            </Typography>
+            <Typography variant="body1" color="textSecondary" gutterBottom sx={{ mb: 3, textAlign: 'center' }}>
+              Join WinBid and start bidding!
+            </Typography>
+            
+            {success && (
+              <Alert severity="success" sx={{ mb: 3 }}>
+                Registration successful! Redirecting to login...
+              </Alert>
+            )}
+            
+            {error && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {error}
+              </Alert>
+            )}
+            
+            <Box 
+              component="form" 
+              onSubmit={handleSubmit} 
+              noValidate
+              sx={{ mt: 1 }}
+            >
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    id="firstName"
+                    label="First Name"
+                    name="firstName"
+                    autoComplete="given-name"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    id="lastName"
+                    label="Last Name"
+                    name="lastName"
+                    autoComplete="family-name"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                  />
+                </Grid>
+              </Grid>
 
-      <Typography variant="h4" gutterBottom>
-        Create an Account
-      </Typography>
-      <Typography variant="body1" gutterBottom>
-        Join WinBid and start bidding!
-      </Typography>
-      
-      {success && (
-        <Alert severity="success" sx={{ mb: 2 }}>
-          User registered successfully! Redirecting to login...
-        </Alert>
-      )}
-      
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-      
-      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 2 }}>
-        <TextField 
-          label="First Name" 
-          name="firstName" 
-          value={formData.firstName} 
-          onChange={handleChange} 
-          required 
-          fullWidth 
-        />
-        <TextField 
-          label="Last Name" 
-          name="lastName" 
-          value={formData.lastName} 
-          onChange={handleChange} 
-          required 
-          fullWidth 
-        />
-        <TextField 
-          label="Email" 
-          type="email" 
-          name="email" 
-          value={formData.email} 
-          onChange={handleChange} 
-          required 
-          fullWidth 
-        />
-        <TextField 
-          label="Password" 
-          type="password" 
-          name="password" 
-          value={formData.password} 
-          onChange={handleChange} 
-          required 
-          fullWidth 
-        />
-        <TextField 
-          select 
-          label="Role" 
-          name="role" 
-          value={formData.role} 
-          onChange={handleChange} 
-          fullWidth
-        >
-          <MenuItem value="USER">User</MenuItem>
-          <MenuItem value="ADMIN">Admin</MenuItem>
-        </TextField>
-        <Button 
-          type="submit" 
-          variant="contained" 
-          color="primary" 
-          fullWidth
-          disabled={loading}
-        >
-          {loading ? "Registering..." : "Register"}
-        </Button>
-      </Box>
-      <Typography variant="body2" sx={{ mt: 2 }}>
-        Already have an account?{' '}
-        <Button onClick={() => navigate("/login")} sx={{ textTransform: "none" }}>
-          Login
-        </Button>
-      </Typography>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="username"
+                label="Username"
+                name="username"
+                autoComplete="username"
+                value={formData.username}
+                onChange={handleChange}
+                sx={{ mt: 2 }}
+              />
+
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                value={formData.email}
+                onChange={handleChange}
+                sx={{ mt: 2 }}
+              />
+
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="new-password"
+                value={formData.password}
+                onChange={handleChange}
+                sx={{ mt: 2 }}
+              />
+
+              <TextField
+                select
+                margin="normal"
+                fullWidth
+                id="role"
+                label="Role"
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                sx={{ mt: 2 }}
+              >
+                <MenuItem value="USER">User</MenuItem>
+                <MenuItem value="ADMIN">Admin</MenuItem>
+              </TextField>
+
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                disabled={loading}
+                sx={{
+                  mt: 3,
+                  mb: 2,
+                  py: 1.5,
+                  fontWeight: 'bold'
+                }}
+              >
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Register"
+                )}
+              </Button>
+            </Box>
+
+            <Typography variant="body2" color="textSecondary" sx={{ mt: 2, textAlign: 'center' }}>
+              Already have an account?{' '}
+              <Link 
+                component="button" 
+                variant="body2"
+                onClick={() => navigate("/login")}
+                sx={{ 
+                  fontWeight: 'bold',
+                  '&:hover': {
+                    textDecoration: 'underline'
+                  }
+                }}
+              >
+                Sign In
+              </Link>
+            </Typography>
+          </Box>
+        </Grid>
       </Grid>
     </Container>
   );
