@@ -194,7 +194,7 @@ const HomePage = () => {
           <Grid container spacing={3} justifyContent="center">
             {[
               { value: "10,000+", label: "Happy Winners" },
-              { value: "$1M+", label: "In Prizes Won" },
+              { value: "₹1M+", label: "In Prizes Won" },
               { value: "500+", label: "Premium Products" },
               { value: "98%", label: "Satisfaction Rate" },
             ].map((stat, index) => (
@@ -292,12 +292,12 @@ const HomePage = () => {
               },
               {
                 title: "Place Your Bid",
-                description: "Pay a small entry fee (as low as $1) to participate in the auction.",
+                description: "Pay a small entry fee (as low as ₹1) to participate in the Bidding.",
                 icon: "💰",
               },
               {
                 title: "Wait for Results",
-                description: "When the auction ends, one lucky bidder wins the product at an incredible value!",
+                description: "When the Bidding ends, one lucky bidder wins the product at an incredible value!",
                 icon: "🎉",
               },
             ].map((step, index) => (
@@ -354,7 +354,7 @@ const HomePage = () => {
       >
         <Container maxWidth="lg">
           <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold" }}>
-            Hot Auctions Ending Soon!
+            Hot Bids Ending Soon!
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 6, maxWidth: 700, mx: "auto" }}>
             Don't miss your chance to win these amazing products. Place your bid today!
@@ -363,24 +363,24 @@ const HomePage = () => {
             {[
               {
                 title: "iPhone 15 Pro Max",
-                price: "$1",
-                retail: "$1,099",
+                price: "₹1",
+                retail: "₹1,099",
                 image: smartphoneImg,
                 bids: 1243,
                 timeLeft: "2h 15m",
               },
               {
                 title: "Rolex Submariner",
-                price: "$2",
-                retail: "$8,000",
+                price: "₹2",
+                retail: "₹8,000",
                 image: watchImg,
                 bids: 892,
                 timeLeft: "4h 30m",
               },
               {
                 title: "PlayStation 5 Bundle",
-                price: "$3",
-                retail: "$499",
+                price: "₹3",
+                retail: "₹499",
                 image: consoleImg,
                 bids: 1567,
                 timeLeft: "1h 45m",
@@ -409,7 +409,7 @@ const HomePage = () => {
                       sx={{ objectFit: "contain", p: 2 }}
                     />
                     <Chip
-                      label={`${item.timeLeft} left`}
+                      label={`₹{item.timeLeft} left`}
                       color="error"
                       size="small"
                       sx={{
@@ -478,7 +478,7 @@ const HomePage = () => {
               borderWidth: "2px",
             }}
           >
-            View All Auctions
+            View All Bids
           </Button>
         </Container>
       </Box>
@@ -494,7 +494,7 @@ const HomePage = () => {
               {
                 name: "Sarah J.",
                 win: "MacBook Pro",
-                quote: "I won a $2,000 MacBook for just $5! Couldn't believe it when I got the notification. WinBid is legit!",
+                quote: "I won a ₹2,000 MacBook for just ₹5! Couldn't believe it when I got the notification. WinBid is legit!",
                 avatar: "👩",
               },
               {
@@ -506,7 +506,7 @@ const HomePage = () => {
               {
                 name: "Emma & David",
                 win: "Maldives Vacation",
-                quote: "Our dream honeymoon for $20 instead of $5,000! Best money we ever spent. Thank you WinBid!",
+                quote: "Our dream honeymoon for ₹20 instead of ₹5,000! Best money we ever spent. Thank you WinBid!",
                 avatar: "👫",
               },
             ].map((testimonial, index) => (

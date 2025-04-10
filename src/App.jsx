@@ -8,7 +8,7 @@ import LoginPage from "./Page/LoginPage";
 import RegisterPage from "./Page/RegisterPage";
 import PaymentPage from "./components/PaymentPage";
 import Contact from "./Page/Contact";
-import AddProductForm from "./components/AddProductForm";
+import AddProductForm from "../src/Page/AddProductForm";
 import ProfilePage from "./Page/ProfilePage";
 import ProductDetails from "./components/ProductDetails";
 import { AuthProvider } from "./components/AuthContext";
