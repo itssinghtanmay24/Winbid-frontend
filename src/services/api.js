@@ -3,11 +3,20 @@ import axios from 'axios';
 // Get API URL from environment variable
 const getApiBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL;
-  if (envUrl) {
+  const isProduction = import.meta.env.PROD;
+  
+  // In production mode, always use production URL (ignore any localhost settings)
+  if (isProduction) {
+    return 'https://winbid-node-js.onrender.com/api';
+  }
+  
+  // In development, use env variable if set and not localhost
+  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
     // If env URL already ends with /api, use it as is, otherwise append /api
     return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`;
   }
-  // Fallback to production URL if env variable is not set
+  
+  // Fallback to production URL
   return 'https://winbid-node-js.onrender.com/api';
 };
 
