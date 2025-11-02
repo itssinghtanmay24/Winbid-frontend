@@ -81,7 +81,11 @@ const Header = () => {
     <>
       <AppBar
         position="static"
-        sx={{ backgroundColor: "white", color: "black", boxShadow: "none" }}
+        sx={{ 
+          backgroundColor: theme.palette.background.default, 
+          color: theme.palette.text.primary, 
+          boxShadow: theme.shadows[2] 
+        }}
       >
         <Toolbar sx={{ justifyContent: "space-between", px: { xs: 1, sm: 2, md: 3 } }}>
           {/* Left side - Logo and Mobile Menu */}

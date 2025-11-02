@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { 
   Container, 
   Typography, 
@@ -203,9 +204,10 @@ const HowItWorks = () => {
             Ready to start bidding?
           </Typography>
           <Button 
+            component={Link}
+            to="/products"
             variant="contained" 
             size="large" 
-            to="/products"
             color="primary"
             sx={{
               px: 6,
