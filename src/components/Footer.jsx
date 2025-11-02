@@ -32,6 +32,12 @@ const SocialIcons = styled(Box)({
 
 const FooterButton = styled(Button)(({ theme }) => ({
   color: theme.palette.common.white,
+  fontSize: "0.875rem",
+  padding: "6px 12px",
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.75rem",
+    padding: "4px 8px",
+  },
   "&:hover": {
     color: theme.palette.secondary.main,
     transform: "translateY(-2px)",
@@ -50,9 +56,11 @@ const Footer = () => {
           sx={{ 
             mb: 2, 
             fontWeight: 700,
+            fontSize: { xs: "1.25rem", sm: "1.5rem", md: "1.75rem" },
             background: "linear-gradient(90deg, #ff8a00, #e52e71)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
+            px: { xs: 2, sm: 0 },
           }}
         >
           Start Your Winning Journey!
@@ -66,8 +74,9 @@ const Footer = () => {
           sx={{ 
             mt: 1,
             mb: 3,
-            px: 4,
+            px: { xs: 3, sm: 4 },
             py: 1,
+            fontSize: { xs: "0.875rem", sm: "1rem" },
             borderRadius: "25px",
             fontWeight: "bold",
             boxShadow: "0 4px 15px rgba(229, 46, 113, 0.4)",

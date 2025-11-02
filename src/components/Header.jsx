@@ -12,18 +12,28 @@ import {
   MenuItem,
   Divider,
   Badge,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
-import { ShoppingCart } from "@mui/icons-material";
+import { ShoppingCart, Menu as MenuIcon } from "@mui/icons-material";
 import { AuthContext } from "./AuthContext";
 import { WishlistContext } from "./WishlistContext";
 import Cart from "./Cart";
 
 const Header = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const { user, isAuthenticated, logout, loading: authLoading } = useContext(AuthContext);
   const { likedCount } = useContext(WishlistContext);
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [cartOpen, setCartOpen] = useState(false);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const open = Boolean(anchorEl);
 
   // Check if user role is admin (case-insensitive and trimmed) - same logic as ProductCard
@@ -53,77 +63,82 @@ const Header = () => {
     navigate("/login");
   };
 
+  const handleDrawerToggle = () => {
+    setMobileDrawerOpen(!mobileDrawerOpen);
+  };
+
+  const handleDrawerClose = () => {
+    setMobileDrawerOpen(false);
+  };
+
+  const navigationItems = [
+    { label: "Home", path: "/" },
+    { label: "How It Works", path: "/howitworks" },
+    { label: "Contact", path: "/contact" },
+  ];
+
   return (
-    <AppBar
-      position="static"
-      sx={{ backgroundColor: "white", color: "black", boxShadow: "none" }}
-    >
-      <Toolbar sx={{ justifyContent: "space-between" }}>
-        <Typography
-          variant="h4"
-          component={Link}
-          to="/"
-          sx={{
-            textDecoration: "none",
-            color: "inherit",
-            fontWeight: "bold",
-            letterSpacing: "1px",
-          }}
-        >
-          WinBid
-        </Typography>
+    <>
+      <AppBar
+        position="static"
+        sx={{ backgroundColor: "white", color: "black", boxShadow: "none" }}
+      >
+        <Toolbar sx={{ justifyContent: "space-between", px: { xs: 1, sm: 2, md: 3 } }}>
+          {/* Left side - Logo and Mobile Menu */}
+          <Box display="flex" alignItems="center" gap={1}>
+            {isMobile && (
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="menu"
+                onClick={handleDrawerToggle}
+                sx={{ mr: 1 }}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
+            <Typography
+              variant={isMobile ? "h5" : "h4"}
+              component={Link}
+              to="/"
+              sx={{
+                textDecoration: "none",
+                color: "inherit",
+                fontWeight: "bold",
+                letterSpacing: "1px",
+                fontSize: { xs: "1.25rem", sm: "1.5rem", md: "2rem" },
+              }}
+            >
+              WinBid
+            </Typography>
+          </Box>
 
-        {/* Middle navigation links */}
-        <Box display="flex" gap={4} sx={{ mx: 4 }}>
-          <Button
-            component={Link}
-            to="/"
-            sx={{
-              textTransform: "none",
-              color: "inherit",
-              fontSize: "1rem",
-              "&:hover": {
-                color: "primary.main",
-                backgroundColor: "transparent",
-              },
-            }}
-          >
-            Home
-          </Button>
-          <Button
-            component={Link}
-            to="/howitworks"
-            sx={{
-              textTransform: "none",
-              color: "inherit",
-              fontSize: "1rem",
-              "&:hover": {
-                color: "primary.main",
-                backgroundColor: "transparent",
-              },
-            }}
-          >
-            How It Works
-          </Button>
-          <Button
-            component={Link}
-            to="/contact"
-            sx={{
-              textTransform: "none",
-              color: "inherit",
-              fontSize: "1rem",
-              "&:hover": {
-                color: "primary.main",
-                backgroundColor: "transparent",
-              },
-            }}
-          >
-            Contact
-          </Button>
-        </Box>
+          {/* Middle navigation links - Desktop only */}
+          {!isMobile && (
+            <Box display="flex" gap={4} sx={{ mx: 4 }}>
+              {navigationItems.map((item) => (
+                <Button
+                  key={item.path}
+                  component={Link}
+                  to={item.path}
+                  sx={{
+                    textTransform: "none",
+                    color: "inherit",
+                    fontSize: "1rem",
+                    "&:hover": {
+                      color: "primary.main",
+                      backgroundColor: "transparent",
+                    },
+                  }}
+                >
+                  {item.label}
+                </Button>
+              ))}
+            </Box>
+          )}
 
-        {/* Right side auth section */}
-        <Box display="flex" alignItems="center" gap={2}>
+          {/* Right side auth section */}
+          <Box display="flex" alignItems="center" gap={{ xs: 0.5, sm: 1, md: 2 }}>
           {isAuthenticated ? (
             <>
               {isAdmin && (
@@ -134,10 +149,11 @@ const Header = () => {
                   color="primary"
                   sx={{
                     textTransform: "none",
-                    fontSize: "0.875rem",
-                    px: 2,
-                    py: 0.75,
+                    fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                    px: { xs: 1, sm: 2 },
+                    py: { xs: 0.5, sm: 0.75 },
                     borderRadius: "8px",
+                    display: { xs: "none", sm: "inline-flex" },
                   }}
                 >
                   Add Product
@@ -165,8 +181,8 @@ const Header = () => {
               >
                 <Avatar
                   sx={{
-                    width: 40,
-                    height: 40,
+                    width: { xs: 32, sm: 40 },
+                    height: { xs: 32, sm: 40 },
                     bgcolor: "primary.main",
                     cursor: "pointer",
                     "&:hover": {
@@ -232,9 +248,9 @@ const Header = () => {
               to="/login"
               sx={{
                 textTransform: "none",
-                fontSize: "1rem",
-                px: 3,
-                py: 1,
+                fontSize: { xs: "0.875rem", sm: "1rem" },
+                px: { xs: 2, sm: 3 },
+                py: { xs: 0.75, sm: 1 },
                 borderRadius: "8px",
               }}
             >
@@ -247,6 +263,68 @@ const Header = () => {
         <Cart open={cartOpen} onClose={() => setCartOpen(false)} />
       )}
     </AppBar>
+
+    {/* Mobile Drawer */}
+    <Drawer
+      anchor="left"
+      open={mobileDrawerOpen}
+      onClose={handleDrawerClose}
+      ModalProps={{
+        keepMounted: true, // Better open performance on mobile.
+      }}
+      sx={{
+        display: { xs: "block", md: "none" },
+        "& .MuiDrawer-paper": {
+          boxSizing: "border-box",
+          width: 280,
+        },
+      }}
+    >
+      <Box sx={{ width: 280, pt: 2 }}>
+        <List>
+          {navigationItems.map((item) => (
+            <ListItem key={item.path} disablePadding>
+              <ListItemButton
+                component={Link}
+                to={item.path}
+                onClick={handleDrawerClose}
+                sx={{
+                  py: 1.5,
+                  px: 3,
+                  "&:hover": {
+                    backgroundColor: "action.hover",
+                  },
+                }}
+              >
+                <ListItemText primary={item.label} />
+              </ListItemButton>
+            </ListItem>
+          ))}
+          {isAuthenticated && isAdmin && (
+            <>
+              <Divider sx={{ my: 1 }} />
+              <ListItem disablePadding>
+                <ListItemButton
+                  component={Link}
+                  to="/addProduct"
+                  onClick={handleDrawerClose}
+                  sx={{
+                    py: 1.5,
+                    px: 3,
+                    "&:hover": {
+                      backgroundColor: "action.hover",
+                    },
+                  }}
+                >
+                  <ListItemText primary="Add Product" />
+                </ListItemButton>
+              </ListItem>
+            </>
+          )}
+        </List>
+      </Box>
+    </Drawer>
+    </>
   );
 };
 
