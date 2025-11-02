@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import {
   Card,
   CardMedia,
@@ -10,7 +10,12 @@ import {
   Chip,
   Stack,
   useTheme,
-  Badge
+  Badge,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -23,12 +28,23 @@ import {
   Person
 } from "@mui/icons-material";
 import api from "../services/api";
+import { WishlistContext } from "./WishlistContext";
+import { AuthContext } from "./AuthContext";
 
 const ProductCard = ({ product, onDelete }) => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const { toggleLike, isLiked } = useContext(WishlistContext);
+  const { user, loading: authLoading } = useContext(AuthContext);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const isBiddingClosed = product.isClosed || product.winner;
-  const [isFavorite, setIsFavorite] = React.useState(false);
+  const productId = product._id || product.id;
+  const isFavorite = isLiked(productId);
+  
+  // Check if user role is admin (case-insensitive and trimmed)
+  // Only check if auth is not loading and user exists
+  const userRole = user?.role ? String(user.role).toLowerCase().trim() : '';
+  const isAdmin = !authLoading && user && userRole === "admin";
 
   const handleCardClick = () => {
     navigate(`/products/${product._id}`, { state: { product } });
@@ -39,19 +55,31 @@ const ProductCard = ({ product, onDelete }) => {
     navigate(`/payment`, { state: { product } });
   };
 
-  const handleDelete = async (e) => {
+  const handleDeleteClick = (e) => {
     e.stopPropagation();
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
     try {
       await api.delete(`/products/${product._id}`);
-      onDelete(product._id);
+      if (onDelete) {
+        onDelete(product._id);
+      }
+      setDeleteDialogOpen(false);
     } catch (error) {
       console.error("Error deleting product:", error);
+      setDeleteDialogOpen(false);
     }
   };
 
-  const toggleFavorite = (e) => {
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+  };
+
+  const handleToggleFavorite = (e) => {
     e.stopPropagation();
-    setIsFavorite(!isFavorite);
+    toggleLike(product);
   };
 
   return (
@@ -86,7 +114,7 @@ const ProductCard = ({ product, onDelete }) => {
         gap: 1
       }}>
         <IconButton
-          onClick={toggleFavorite}
+          onClick={handleToggleFavorite}
           sx={{
             backgroundColor: 'rgba(255, 255, 255, 0.8)',
             '&:hover': {
@@ -99,19 +127,46 @@ const ProductCard = ({ product, onDelete }) => {
             <Favorite color="error" /> : 
             <FavoriteBorder color="disabled" />}
         </IconButton>
-        <IconButton
-          onClick={handleDelete}
-          sx={{
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 0, 0, 0.2)',
-            }
-          }}
-          aria-label="delete"
-        >
-          <Delete color="error" />
-        </IconButton>
+        {isAdmin && (
+          <IconButton
+            onClick={handleDeleteClick}
+            sx={{
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 0, 0, 0.2)',
+              }
+            }}
+            aria-label="delete"
+          >
+            <Delete color="error" />
+          </IconButton>
+        )}
       </Box>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">
+          Confirm Delete
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Are you sure you want to delete "{product.name}"? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Product image with status overlay */}
       <Box sx={{

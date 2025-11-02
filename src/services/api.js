@@ -1,7 +1,18 @@
 import axios from 'axios';
 
+// Get API URL from environment variable
+const getApiBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl) {
+    // If env URL already ends with /api, use it as is, otherwise append /api
+    return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`;
+  }
+  // Fallback to production URL if env variable is not set
+  return 'https://winbid-node-js.onrender.com/api';
+};
+
 const api = axios.create({
-  baseURL: 'https://winbid-node-js.onrender.com/api', // Ensure this matches your backend
+  baseURL: getApiBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
@@ -10,7 +21,7 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -26,8 +37,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userId');
       window.location.href = '/login';
     }
     return Promise.reject(error);

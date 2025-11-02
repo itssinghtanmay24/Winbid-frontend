@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   AppBar,
@@ -11,14 +11,33 @@ import {
   Menu,
   MenuItem,
   Divider,
+  Badge,
 } from "@mui/material";
+import { ShoppingCart } from "@mui/icons-material";
 import { AuthContext } from "./AuthContext";
+import { WishlistContext } from "./WishlistContext";
+import Cart from "./Cart";
 
 const Header = () => {
-  const { user, isAuthenticated, logout } = useContext(AuthContext);
+  const { user, isAuthenticated, logout, loading: authLoading } = useContext(AuthContext);
+  const { likedCount } = useContext(WishlistContext);
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [cartOpen, setCartOpen] = useState(false);
   const open = Boolean(anchorEl);
+
+  // Check if user role is admin (case-insensitive and trimmed) - same logic as ProductCard
+  const userRole = user?.role ? String(user.role).toLowerCase().trim() : '';
+  const isAdmin = !authLoading && user && userRole === "admin";
+  
+  // Debug: Log user data to help troubleshoot
+  React.useEffect(() => {
+    if (isAuthenticated && user) {
+      console.log("Header - User data:", user);
+      console.log("Header - User role:", user.role);
+      console.log("Header - Is admin:", isAdmin);
+    }
+  }, [user, isAuthenticated, isAdmin]);
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -107,6 +126,36 @@ const Header = () => {
         <Box display="flex" alignItems="center" gap={2}>
           {isAuthenticated ? (
             <>
+              {isAdmin && (
+                <Button
+                  component={Link}
+                  to="/addProduct"
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    textTransform: "none",
+                    fontSize: "0.875rem",
+                    px: 2,
+                    py: 0.75,
+                    borderRadius: "8px",
+                  }}
+                >
+                  Add Product
+                </Button>
+              )}
+              <IconButton
+                onClick={() => setCartOpen(true)}
+                sx={{
+                  color: "inherit",
+                  "&:hover": {
+                    backgroundColor: "action.hover",
+                  },
+                }}
+              >
+                <Badge badgeContent={likedCount} color="error">
+                  <ShoppingCart />
+                </Badge>
+              </IconButton>
               <IconButton
                 onClick={handleMenuOpen}
                 sx={{ p: 0 }}
@@ -194,6 +243,9 @@ const Header = () => {
           )}
         </Box>
       </Toolbar>
+      {isAuthenticated && (
+        <Cart open={cartOpen} onClose={() => setCartOpen(false)} />
+      )}
     </AppBar>
   );
 };

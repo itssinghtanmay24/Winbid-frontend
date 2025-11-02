@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   Container,
@@ -22,17 +22,38 @@ import {
 } from "@mui/material";
 import {
   ArrowBack,
-  AttachMoney,
   Person,
   CalendarToday,
   Category,
+  Favorite,
+  FavoriteBorder,
 } from "@mui/icons-material";
+
+// Rupee Icon Component
+const RupeeIcon = ({ fontSize = 'inherit', ...props }) => (
+  <Typography
+    component="span"
+    sx={{
+      fontSize: fontSize === 'small' ? '0.875rem' : fontSize === 'large' ? '1.25rem' : 'inherit',
+      fontWeight: 600,
+      lineHeight: 1,
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}
+    {...props}
+  >
+    ₹
+  </Typography>
+);
 import productApi from "../services/productApi";
+import { WishlistContext } from "./WishlistContext";
 
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { toggleLike, isLiked } = useContext(WishlistContext);
   const [product, setProduct] = useState(null);
   const [ownerName, setOwnerName] = useState(null);
   const [winnerName, setWinnerName] = useState(null);
@@ -102,11 +123,31 @@ const ProductDetails = () => {
   const bidCompletionPercentage =
     (product.currentBidCount / product.totalBids) * 100;
 
+  const productId = product._id || product.id;
+  const isFavorite = isLiked(productId);
+
   return (
     <Container maxWidth="lg" sx={{ py: 4, mt: 4 }}>
-      <IconButton onClick={() => navigate(-1)} sx={{ mb: 2 }}>
-        <ArrowBack /> Back
-      </IconButton>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        <IconButton onClick={() => navigate(-1)}>
+          <ArrowBack /> Back
+        </IconButton>
+        <IconButton
+          onClick={() => toggleLike(product)}
+          sx={{
+            color: isFavorite ? 'error.main' : 'inherit',
+            '&:hover': {
+              backgroundColor: 'action.hover',
+            },
+          }}
+          aria-label="like product"
+        >
+          {isFavorite ? <Favorite /> : <FavoriteBorder />}
+        </IconButton>
+        <Typography variant="body2" color="text.secondary">
+          {isFavorite ? 'Liked' : 'Like this product'}
+        </Typography>
+      </Box>
 
       <Grid container spacing={4}>
         <Grid item xs={12} md={6}>
@@ -144,7 +185,7 @@ const ProductDetails = () => {
                 <ListItem>
                   <ListItemAvatar>
                     <Avatar>
-                      <AttachMoney />
+                      <RupeeIcon />
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText

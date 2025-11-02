@@ -12,12 +12,14 @@ import AddProductForm from "../src/Page/AddProductForm";
 import ProfilePage from "./Page/ProfilePage";
 import ProductDetails from "./components/ProductDetails";
 import { AuthProvider } from "./components/AuthContext";
+import { WishlistProvider } from "./components/WishlistContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <WishlistProvider>
+        <Router>
         <div className="app-container">
           <Header />
           <main className="main-content">
@@ -63,6 +65,7 @@ function App() {
           <Footer />
         </div>
       </Router>
+      </WishlistProvider>
     </AuthProvider>
   );
 }

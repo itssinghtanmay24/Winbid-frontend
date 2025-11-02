@@ -1,17 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Container, Typography, Button, TextField, Divider, Box, Alert } from "@mui/material";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { AuthContext } from "../components/AuthContext";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     email: "",
     password: ""
   });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -29,21 +33,22 @@ const LoginPage = () => {
       }
 
       // Make API call to login endpoint
-      const response = await axios.post("https://winbid-node-js.onrender.com/api/auth/login", {
+      const response = await axios.post(apiUrl + "/auth/login", {
         email: formData.email,
         password: formData.password
       });
 
       // Check if login was successful
       if (response.data.success && response.data.token) {
-        // Store the token in localStorage or context
-        localStorage.setItem("authToken", response.data.token);
-        localStorage.setItem("userId", response.data.user.id);
+        // Update AuthContext with login function
+        const loginSuccess = await login(response.data.token, response.data.user);
         
-        // You might want to store user data in context or redux here
-        
-        // Navigate to products page
-        navigate('/products');
+        if (loginSuccess) {
+          // Navigate to products page
+          navigate('/products');
+        } else {
+          throw new Error("Failed to update authentication state");
+        }
       } else {
         throw new Error("Login failed. Please try again.");
       }

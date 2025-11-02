@@ -23,9 +23,16 @@ const Products = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        // Assuming your API returns data in the format you provided
+        // productApi.getAllProducts() already returns response.data
         const response = await productApi.getAllProducts();
-        const data = response.data; // Access the data array from the response
+        // Handle both cases: if response is an array or has a data property
+        const data = Array.isArray(response) ? response : (response.data || response);
+
+        if (!Array.isArray(data) || data.length === 0) {
+          setProducts([]);
+          setLoading(false);
+          return;
+        }
 
         const productsWithBidsAndWinner = await Promise.all(
           data.map(async (product) => {
@@ -83,6 +90,10 @@ const Products = () => {
     );
   }
 
+  const handleDelete = (productId) => {
+    setProducts(prevProducts => prevProducts.filter(product => product._id !== productId));
+  };
+
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
       <Typography variant="h4" gutterBottom textAlign="center">
@@ -91,29 +102,11 @@ const Products = () => {
       <Grid container spacing={3}>
         {products.map((product) => (
           <Grid item key={product._id} xs={12} sm={6} md={4}>
-            <ProductCard product={product}  />
+            <ProductCard product={product} onDelete={handleDelete} />
             
           </Grid>
         ))}
       </Grid>
-
-      <Tooltip title="Add New Product" arrow>
-        <Fab
-          color="secondary"
-          aria-label="add"
-          sx={{
-            position: "fixed",
-            bottom: 16,
-            right: 16,
-            zIndex: 1000,
-            backgroundColor: "#f50057",
-            "&:hover": { backgroundColor: "#c51162" },
-          }}
-          onClick={() => navigate("/addProduct")}
-        >
-          <FaPlus size={20} />
-        </Fab>
-      </Tooltip>
     </Container>
   );
 };

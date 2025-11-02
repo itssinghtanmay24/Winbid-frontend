@@ -18,11 +18,29 @@ import {
 import {
   AddPhotoAlternate,
   Description,
-  AttachMoney,
   Numbers,
   ShoppingBag
 } from '@mui/icons-material';
-import axios from 'axios';
+
+// Rupee Icon Component for InputAdornment
+const RupeeIcon = ({ color = 'inherit', ...props }) => (
+  <Typography
+    component="span"
+    sx={{
+      fontSize: '1.25rem',
+      fontWeight: 600,
+      lineHeight: 1,
+      color: color === 'action' ? 'action.active' : color,
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}
+    {...props}
+  >
+    ₹
+  </Typography>
+);
+import productApi from '../services/productApi';
 
 const AddProductForm = () => {
   const navigate = useNavigate();
@@ -61,14 +79,11 @@ const AddProductForm = () => {
         imageUrl: formData.imageUrl,
         totalBids: formData.totalBids,
         bidPrice: formData.bidPrice,
-        owner: formData.userId
+        owner: formData.userId,
+        adminId: formData.userId // productApi expects adminId for the admin field
       };
 
-      const response = await axios.post('https://winbid-node-js.onrender.com/api/products', productData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      await productApi.createProduct(productData);
       
       setSuccess(true);
       setTimeout(() => {
@@ -266,7 +281,7 @@ const AddProductForm = () => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <AttachMoney color="action" />
+                          <RupeeIcon color="action" />
                         </InputAdornment>
                       ),
                     }}

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { WishlistContext } from "./WishlistContext";
 import { 
   Container, 
   Grid, 
@@ -25,6 +26,7 @@ import { RiWallet3Line } from "react-icons/ri";
 import { MdPayment } from "react-icons/md";
 
 const PaymentPage = () => {
+  const { addToBidded } = useContext(WishlistContext);
   const [paymentMethod, setPaymentMethod] = useState("upi");
   const [upiOption, setUpiOption] = useState("qr");
   const [countdown, setCountdown] = useState(300); // 5 minutes in seconds
@@ -88,6 +90,12 @@ const PaymentPage = () => {
 
     // Simulate payment processing
     setError(null);
+    
+    // Add product to bidded items (this will automatically remove from liked if it was liked)
+    if (product && (product._id || product.id)) {
+      addToBidded(product);
+    }
+    
     setTimeout(() => {
       setPaymentSuccess(true);
       // In a real app, you would redirect to success page or show success message
