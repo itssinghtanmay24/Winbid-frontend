@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { Container, Typography, Button, TextField, Divider, Box, Alert } from "@mui/material";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../services/api";
 import { AuthContext } from "../components/AuthContext";
 
 const LoginPage = () => {
@@ -14,8 +14,6 @@ const LoginPage = () => {
   });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  const apiUrl = import.meta.env.VITE_API_URL;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -33,7 +31,7 @@ const LoginPage = () => {
       }
 
       // Make API call to login endpoint
-      const response = await axios.post(apiUrl + "/auth/login", {
+      const response = await api.post("/auth/login", {
         email: formData.email,
         password: formData.password
       });
